@@ -1,0 +1,8 @@
+fastapi
+torch
+torchvision
+transformers
+pillow
+matplotlib
+cmasher
+uvicorn
