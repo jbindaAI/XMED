@@ -1,9 +1,7 @@
-# from dino_trunc import dino_trunc
 import torch
 import pytorch_lightning as pl
 import torch.nn as nn
 import torch.nn.functional as F
-import torchmetrics
 
 def set_encoder_dropout_p(module, dropout_p):
     if isinstance(module, nn.Dropout):

@@ -1,2 +1,4 @@
 models/checkpoints/Biomarkers/*.ckpt
 models/checkpoints/End2End/*.ckpt
+data/*.pkl
+data/crops/*.pt

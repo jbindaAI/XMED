@@ -6,19 +6,33 @@
 
 
 # Imports
+import copy
 import torch
-
-from typing import Literal
+from torchvision import transforms
+import pickle
+from typing import Literal, Tuple
 
 from Biomarker_SSL import Biomarker_Model
 from End2End_SSL import End2End_Model
-from utils import *
+from models.att_cdam_utils import get_maps
+from models.loading_data_utils import load_img
 
+# Globals
+### Normalizing MEAN:
+with open("data/fitted_mean_std.pkl", 'rb') as f:
+    dict_ = pickle.load(f)
+
+MEAN = dict_["mean"]
+STD = dict_["std"]
+
+### Fitted biomarker scaler object: --> byc może się przyda, by reverse transform.
+#with open("data/scaler.pkl", 'rb') as f:
+    #SCALER = pickle.load(f)
 
 
 # MAIN
 
-def main(PATIENT: str, SLICE: int, TASK: Literal["Regression", "Classification"]):
+def model_pipeline(NODULE: str, SLICE: int, TASK: Literal["Regression", "Classification"])->Tuple[torch.Tensor, torch.Tensor]:
     """
     Function running XMED pipeline.
     """
@@ -37,7 +51,6 @@ def main(PATIENT: str, SLICE: int, TASK: Literal["Regression", "Classification"]
     
     ## Creating hooks:
     activation = {}
-
     def get_activation(name):
         """
         Function to extract activations before the last MHSA layer.
@@ -47,7 +60,6 @@ def main(PATIENT: str, SLICE: int, TASK: Literal["Regression", "Classification"]
         return hook
     
     grad = {}
-
     def get_gradient(name):
         """
         Function to extract gradients.
@@ -70,19 +82,10 @@ def main(PATIENT: str, SLICE: int, TASK: Literal["Regression", "Classification"]
         get_gradient("last_att_in"))
 
     # Loading image from repository:
-    ...
+    img, original_img = load_img(crop_path=f"data/crops/{NODULE}.pt", crop_view="axial", slice_=SLICE, device=device)
 
     # Model inference:
     model = model.to(device)
-    attention_map, class_attention_map = get_maps(model, IMAGE, target_class=TARGET_CLASS, clip=True)
+    attention_map, class_attention_map = get_maps(model, img, grad, activation, TASK, clip=True) 
 
-    
-
-
-
-    return +1
-
-
-
-if __name__ == "__main__":
-    main()
+    return (attention_map, class_attention_map)

@@ -1,4 +1,3 @@
-dino# from dino_trunc import dino_trunc
 import torch
 import pytorch_lightning as pl
 import torch.nn as nn
