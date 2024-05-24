@@ -34,13 +34,13 @@ def get_cmap(heatmap):
     return cmr.get_sub_cmap(mycmap, bottom, top)
 
 
-def plot_results(original, maps, model_type, savename=None, figsize=(9, 9)):
+def plot_results(original, maps, figsize=(9, 9)):
     """Using matplotlib, plot the original image and the relevance maps"""
     plt.figure(figsize=figsize)
     num_plots = 1 + len(maps)
 
     plt.subplot(1, num_plots, 1)
-    plt.imshow(original)
+    plt.imshow(original[:, :, 0])
     plt.set_cmap('gray')
     plt.axis("off")
     for i, m in enumerate(maps):
@@ -48,13 +48,6 @@ def plot_results(original, maps, model_type, savename=None, figsize=(9, 9)):
         plt.imshow(m, cmap=get_cmap(m))
         plt.axis("off")
     plt.subplots_adjust(wspace=0.005, hspace=0)
-    # save the plot to a file, cropped to only the image
-    if savename:
-        if model_type=="Biomarkers":
-            save_path = f"./maps/SSL_ViT/Biomarkers/{savename}.png"
-        elif model_type=="End2End":
-            save_path = f"./maps/SSL_ViT/End2End/{savename}.png"
-        plt.savefig(save_path, bbox_inches="tight", pad_inches=0)
     plt.show()
 
 
@@ -62,7 +55,7 @@ def plot_results(original, maps, model_type, savename=None, figsize=(9, 9)):
 ## Obtaining attention map
 def get_attention_map(model, sample_img, head=None, return_raw=False):
     """This returns the attentions when CLS token is used as query in the last attention layer, averaged over all attention heads"""
-    attentions = model.get_last_selfattention(sample_img)
+    attentions = model.model.get_last_selfattention(sample_img)
 
     w_featmap = sample_img.shape[-2] // PATCH_SIZE
     h_featmap = sample_img.shape[-1] // PATCH_SIZE
@@ -88,7 +81,7 @@ def get_attention_map(model, sample_img, head=None, return_raw=False):
 ## Obtaining CDAM map
 def get_CDAM(class_score, activation, grad, clip=False, return_raw=False):
     """The class_score can either be the activation of a neuron in the prediction vector or a similarity score between the latent representations of a concept and a sample"""
-    class_score.backward()
+    class_score.backward(retain_graph=True)
     # Token 0 is CLS and others are image patch tokens
     tokens = activation["last_att_in"][1:]
     grads = grad["last_att_in"][0][0, 1:]
@@ -130,7 +123,7 @@ def get_maps(model, img, grad, activation, task, return_raw=False, clip=False):
     In the case of LIDC dataset, target class is a malignant nodule or biomarkers.
     """
     CDAM_maps = {}
-    if task == "Regression":
+    if task == "Classification":
         pred = model(img)
         class_attention_map = get_CDAM(
             class_score=pred[0][0],
@@ -138,7 +131,7 @@ def get_maps(model, img, grad, activation, task, return_raw=False, clip=False):
             grad=grad,
             return_raw=return_raw,
             clip=clip)
-        CDAM_maps[key]=class_attention_map
+        CDAM_maps["End2End"]=class_attention_map
     else:
         pred = model(img)
         for key in class2idx.keys():
