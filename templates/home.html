@@ -72,9 +72,9 @@
                         <div class="col-md-9 offset-1 text-center">
                             <div class="btn-group-horizontal" role="group" aria-label="Horizontal radio toggle button group">
                                 <form action="{{  url_for('predict', NODULE=NODULE, SLICE=SLC) }}" method="get">
-                                    <input type="radio" class="btn-check" name="TASK" id="button1" value="Classification" autocomplete="off" checked>
+                                    <input type="radio" class="btn-check" name="TASK" id="button1" value="Classification" autocomplete="off" required>
                                     <label class="btn btn-outline-primary" for="button1">Classification</label>
-                                    <input type="radio" class="btn-check" name="TASK" id="button2" value="Regression" autocomplete="off">
+                                    <input type="radio" class="btn-check" name="TASK" id="button2" value="Regression" autocomplete="off" required>
                                     <label class="btn btn-outline-primary" for="button2">Regression</label>
                                     <div>
                                         <button type="submit" class="btn btn-primary mt-3"><strong>PREDICT!</strong></button>
@@ -86,19 +86,41 @@
                 </div>
             </div>
 
-
-
+            {% if res_plot %}
             <!-- Plotting Results -->
             <div class="col-md-12 mt-4">
-                <div class="container">
-                    <div class="d-flex justify-content-center">
-                        <h2>Results</h2>
+                <div class="row image-box">
+                    <h2>Results</h2>
+                    <div class="col-md-10">
+                        <div class="title-container">
+                            <img src="data:image/png;base64,{{ res_plot }}" class="img-fluid" alt="Plot of resulting maps">
+                        </div>
                     </div>
-                    <div class="d-flex justify-content-center">
-                        <img src="{{ url_for('static', path='/0567.png') }}" alt="Exemplary visualization" class="img-fluid">
+                    <div class="col-md-2">
+                        {% if TASK == "Classification"  %}
+                        <h4> True diagnosis: </h4>
+                        <div>
+                            <strong> {% if GROUND_TRUTH == 1  %} MALIGNANT {%  else  %} BENIGN {%  endif  %} </strong>
+                        </div>
+                        <h4> Predicted status </h4>
+                        <strong> {% if PREDS > 0.5  %} MALIGNANT {%  else  %} BENIGN {%  endif  %}</strong>
+                        <p> Probability of malignancy: </p>
+                        <div>
+                            {{  PREDS  }}
+                        </div>
+
+                        {% else %}
+                        <h4> Predicted Biomarkers: </h4>
+                        <ul>
+                            {% for key in PREDS.keys() %}
+                            <li> {{  key  }}: {{  PREDS[key]  }}</li>
+                            {% endfor %}
+                        </ul>
+                        {%  endif  %}
                     </div>
                 </div>
             </div>
+            {% endif %}
         </div>
     </main>
 

@@ -7,4 +7,6 @@ torchmetrics
 matplotlib
 cmasher
 numpy
+pandas
+scikit-learn==1.3.0
 

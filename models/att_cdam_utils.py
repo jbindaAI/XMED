@@ -3,6 +3,11 @@ import cmasher as cmr
 import matplotlib.pyplot as plt
 import torch
 import numpy as np
+import pickle
+
+# Loading fitted previously standard scaler:
+with open("data/scaler.pkl", "rb") as file:
+    scaler = pickle.load(file)
 
 # Globals
 PATCH_SIZE=8
@@ -32,23 +37,6 @@ def get_cmap(heatmap):
         bottom = 0.5 - abs((heatmap.min() / abs(heatmap).max()) / 2)
         top = 0.5 + abs((heatmap.max() / abs(heatmap).max()) / 2)
     return cmr.get_sub_cmap(mycmap, bottom, top)
-
-
-def plot_results(original, maps, figsize=(9, 9)):
-    """Using matplotlib, plot the original image and the relevance maps"""
-    plt.figure(figsize=figsize)
-    num_plots = 1 + len(maps)
-
-    plt.subplot(1, num_plots, 1)
-    plt.imshow(original[:, :, 0])
-    plt.set_cmap('gray')
-    plt.axis("off")
-    for i, m in enumerate(maps):
-        plt.subplot(1, num_plots, i + 2)
-        plt.imshow(m, cmap=get_cmap(m))
-        plt.axis("off")
-    plt.subplots_adjust(wspace=0.005, hspace=0)
-    plt.show()
 
 
 # Obtaining maps
@@ -110,10 +98,10 @@ def get_CDAM(class_score, activation, grad, clip=False, return_raw=False):
 
 
 ## Additional dictionary between target name and logit position in the output layer. Needed for get_maps() wrapper.
-class2idx = {"subtlety":0, "calcification":1, 
-             "margin":2, "lobulation":3, 
-             "spiculation":4, "diameter":5, 
-             "texture":6, "sphericity":7}
+class2idx = {"Subtlety":0, "Calcification":1, 
+             "Margin":2, "Lobulation":3, 
+             "Spiculation":4, "Diameter":5, 
+             "Texture":6, "Sphericity":7}
 
 
 ## Wrapper to obtain both Attention map and CDAM map.
@@ -122,9 +110,11 @@ def get_maps(model, img, grad, activation, task, return_raw=False, clip=False):
     Wrapper function to get the attention map and the concept map for a given image and target class.
     In the case of LIDC dataset, target class is a malignant nodule or biomarkers.
     """
+    attention_map = get_attention_map(model, img, return_raw=return_raw)
+
     CDAM_maps = {}
+    pred = model(img)
     if task == "Classification":
-        pred = model(img)
         class_attention_map = get_CDAM(
             class_score=pred[0][0],
             activation=activation,
@@ -132,8 +122,11 @@ def get_maps(model, img, grad, activation, task, return_raw=False, clip=False):
             return_raw=return_raw,
             clip=clip)
         CDAM_maps["End2End"]=class_attention_map
+        probs = torch.sigmoid(pred).cpu().squeeze().item()
+        return attention_map, CDAM_maps, probs
     else:
-        pred = model(img)
+        pred_biom = {}
+        rescaled_preds = scaler.inverse_transform(pred.cpu().detach().numpy())
         for key in class2idx.keys():
             class_attention_map = get_CDAM(
                 class_score=pred[0][class2idx[key]],
@@ -142,6 +135,5 @@ def get_maps(model, img, grad, activation, task, return_raw=False, clip=False):
                 return_raw=return_raw,
                 clip=clip)
             CDAM_maps[key]=class_attention_map
-
-    attention_map = get_attention_map(model, img, return_raw=return_raw)
-    return attention_map, CDAM_maps 
+            pred_biom[key]=round(rescaled_preds[0][class2idx[key]], 2)
+        return attention_map, CDAM_maps, pred_biom

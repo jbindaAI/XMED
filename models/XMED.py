@@ -12,7 +12,7 @@ from typing import Literal, Tuple, Dict
 
 from models.Biomarker_SSL import Biomarker_Model
 from models.End2End_SSL import End2End_Model
-from models.att_cdam_utils import get_maps, plot_results
+from models.att_cdam_utils import get_maps
 from loading_data_utils import load_img
 
 # Globals
@@ -89,18 +89,9 @@ def model_pipeline(NODULE: str, SLICE: int, TASK: Literal["Regression", "Classif
 
     # Model inference:
     model = model.to(device)
-    attention_map, CDAM_maps = get_maps(model, img, grad, activation, TASK, clip=True) 
+    attention_map, CDAM_maps, model_output = get_maps(model, img, grad, activation, TASK, clip=True) 
 
-    return (original_img, attention_map, CDAM_maps)
+    return (original_img, attention_map, CDAM_maps, model_output)
 
-
-DEBUG = False
-if DEBUG:
-    org_img, att_map, CDAM_map = model_pipeline(NODULE="0567", SLICE=14, TASK="Regression")
-    print(org_img.shape)
-    print(att_map.shape)
-    print(CDAM_map["subtlety"].shape)
-
-    plot_results(org_img, [att_map, CDAM_map["margin"]])
 
 
