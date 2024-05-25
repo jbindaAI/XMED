@@ -14,7 +14,7 @@
     <!-- Header with project name (as logo) and link to About page. -->
     <div class="container">
         <header class="d-flex flex-wrap justify-content-center py-3 mb-4 border-bottom">
-            <a href="{{  url_for('home')  }}" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-dark text-decoration-none">
+            <a href="{{ url_for('home') }}" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-dark text-decoration-none">
                 <span class="fs-4"><span class="logo-x">X</span><span class="logo-med">MED</span></span>
             </a>
         </header>
@@ -24,85 +24,83 @@
         <div class="container">
             <div class="row">
                 <!-- CT slices visualization -->
-                <div class="col-md-4 image-box">
+                <div class="col-md-6 image-box">
                     <div class="title-container">
                         <h3>Nodule visualization</h3>
                         <img src="data:image/png;base64,{{ orig_plot }}" class="img-fluid" alt="Generated Image">
                     </div>
                 </div>
                 <!-- Options -->
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <!-- First row of buttons -->
-                    <h3> Choose nodule example </h3>
-                    <div class="row mb-2">
-                        <div class="col-md-4">
-                            <a href="{{ url_for('visualize_nodule', N2Vis='0065', SLC=16) }}"
-                                class="btn btn-primary btn-block">Nodule 1</a>
+                    <div class="row mb-2 mt-3">
+                        <h3>Choose nodule example</h3>
+                        <div class="col-md-3 offset-1 text-center">
+                            <a href="{{ url_for('visualize_nodule', N2Vis='0065', SLC=16) }}" class="btn btn-primary btn-block">Nodule 1</a>
                         </div>
-                        <div class="col-md-4">
-                            <a href="{{ url_for('visualize_nodule', N2Vis='0303', SLC=16) }}"
-                                class="btn btn-primary btn-block">Nodule 2</a>
+                        <div class="col-md-3 text-center">
+                            <a href="{{ url_for('visualize_nodule', N2Vis='0303', SLC=16) }}" class="btn btn-primary btn-block">Nodule 2</a>
                         </div>
-                        <div class="col-md-4">
-                            <a href="{{ url_for('visualize_nodule', N2Vis='0567', SLC=16) }}"
-                                class="btn btn-primary btn-block">Nodule 3</a>
+                        <div class="col-md-3 text-center">
+                            <a href="{{ url_for('visualize_nodule', N2Vis='0567', SLC=16) }}" class="btn btn-primary btn-block">Nodule 3</a>
                         </div>
                     </div>
                     <!-- Second row of buttons -->
-                    <div class="row">
-                        <div class="col-md-4">
-                            <a href="{{ url_for('visualize_nodule', N2Vis='0065', SLC=16) }}"
-                                class="btn btn-primary btn-block">Nodule 4</a>
+                    <div class="row mb-2">
+                        <div class="col-md-3 offset-1 text-center">
+                            <a href="{{ url_for('visualize_nodule', N2Vis='0065', SLC=16) }}" class="btn btn-primary btn-block">Nodule 1</a>
                         </div>
-                        <div class="col-md-4">
-                            <a href="{{ url_for('visualize_nodule', N2Vis='0303', SLC=16) }}"
-                                class="btn btn-primary btn-block">Nodule 5</a>
+                        <div class="col-md-3 text-center">
+                            <a href="{{ url_for('visualize_nodule', N2Vis='0303', SLC=16) }}" class="btn btn-primary btn-block">Nodule 2</a>
                         </div>
-                        <div class="col-md-4">
-                            <a href="{{ url_for('visualize_nodule', N2Vis='0567', SLC=16) }}"
-                                class="btn btn-primary btn-block">Nodule 6</a>
+                        <div class="col-md-3 text-center">
+                            <a href="{{ url_for('visualize_nodule', N2Vis='0567', SLC=16) }}" class="btn btn-primary btn-block">Nodule 3</a>
                         </div>
                     </div>
-                    <h3> Choose nodule slice </h3>
-                    <div class="form-group">
-                        <label for="sliceNumber" class="form-label">Choose Slice Number:</label>
-                        <input type="range" class="form-range" min="5" max="30" step="1" id="sliceNumber" value="16" oninput="sliceOutput.value = sliceNumber.value">
-                        <output id="sliceOutput">16</output>
+                    <!-- Slice number input -->
+                    <div class="row mt-3 form-group">
+                        <h3>Choose nodule slice</h3>
+                        <form action="{{ url_for('visualize_nodule', N2Vis='0065', SLC=16) }}">
+                            <div class="col-md-9 offset-1">
+                                <input type="range" class="form-range" min="5" max="30" step="1" id="sliceNumber" value="16" oninput="sliceOutput.value = sliceNumber.value">
+                                <p>Chosen slice: <output id="sliceOutput">16</output></p>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Visualize slice!</button>
+                        </form>
                     </div>
-                    <button type="submit" class="btn btn-primary">Visualize Slice</button>
-                    
-                    <h3> Choose prediction mode </h3>
-                    <div class="btn-group-horizontal" role="group" aria-label="Horizontal radio toggle button group">
-                        <input type="radio" class="btn-check" name="vbtn-radio" id="vbtn-radio1" autocomplete="off" checked>
-                        <label class="btn btn-outline-primary" for="vbtn-radio1">Classification</label>
-                        <input type="radio" class="btn-check" name="vbtn-radio" id="vbtn-radio2" autocomplete="off">
-                        <label class="btn btn-outline-primary" for="vbtn-radio2">Regression</label>
-                      </div>
-
-                </div>
-                <div class="col-md-4">
-                    <h2>About</h2>
+                    <div class="row mb-2">
+                        <h3>Choose prediction mode</h3>
+                        <div class="col-md-9 offset-1 text-center">
+                            <div class="btn-group-horizontal" role="group" aria-label="Horizontal radio toggle button group">
+                                <input type="radio" class="btn-check" name="vbtn-radio" id="vbtn-radio1" autocomplete="off" checked>
+                                <label class="btn btn-outline-primary" for="vbtn-radio1">Classification</label>
+                                <input type="radio" class="btn-check" name="vbtn-radio" id="vbtn-radio2" autocomplete="off">
+                                <label class="btn btn-outline-primary" for="vbtn-radio2">Regression</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <!-- Calling model inference -->
+                        <div class="col-md-9 mt-3 offset-1 text-center">
+                            <a href="{{ url_for('predict', NODULE=N2Pred) }}" class="btn btn-primary"><strong>Predict!</strong></a>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Calling model inference -->
-            <div class="col-md-12 d-flex justify-content-center">
-                    <a href="{{ url_for('predict', NODULE=N2Pred) }}" class="btn btn-primary">Predict!</a>
-            </div>
+
 
             <!-- Plotting Results -->
-            <div class="col-md-12">
+            <div class="col-md-12 mt-4">
                 <div class="container">
                     <div class="d-flex justify-content-center">
                         <h2>Results</h2>
                     </div>
                     <div class="d-flex justify-content-center">
-                        <img src="{{ url_for('static', path='/0567.png') }}" alt="Exemplary visualization"
-                            class="img-fluid">
+                        <img src="{{ url_for('static', path='/0567.png') }}" alt="Exemplary visualization" class="img-fluid">
                     </div>
                 </div>
             </div>
-        </div>
         </div>
     </main>
 
@@ -111,8 +109,7 @@
         <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
             <p class="col-md-4 mb-0 footer-text">&copy; 2024 XMED</p>
 
-            <a href="/"
-                class="col-md-4 d-flex align-items-center justify-content-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none">
+            <a href="/" class="col-md-4 d-flex align-items-center justify-content-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none">
                 <span class="fs-4"><span class="logo-x">X</span><span class="logo-med">MED</span></span>
             </a>
 
@@ -123,14 +120,21 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
-        integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
-        crossorigin="anonymous"></script>
+        integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"
-        integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy"
-        crossorigin="anonymous"></script>
+        integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-        crossorigin="anonymous"></script>
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script>
+        function updateSlice() {
+            const sliceNumber = document.getElementById('sliceNumber').value;
+            const n2Vis = document.getElementById('N2Vis').value || '0065';  // Default to '0065' if no nodule selected
+            const url = new URL(window.location.href);
+            url.searchParams.set('N2Vis', n2Vis);
+            url.searchParams.set('Slc', sliceNumber);
+            window.location.href = url.toString();
+        }
+    </script>
 </body>
 
 </html>

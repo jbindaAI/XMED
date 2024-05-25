@@ -54,8 +54,10 @@ def visualize_nodule(request: Request, N2Vis: str, SLC: int):
 
 @app.get("/predict/{NODULE}", response_class=HTMLResponse)
 def predict(request: Request, NODULE: str):
-    print(f"NODULE: {NODULE}" )
     original_img, attention_map, CDAM_maps = XMED.model_pipeline(NODULE=NODULE, SLICE=16, TASK="Regression")
+    print("INFERENCE SUCCESFULL!")
+    img_str = plot_nodule(original_img)
+    # There is need for continuation...
     
     return templates.TemplateResponse(
-        name="home.html", request=request, context={"N2Pred": NODULE})
+        name="home.html", request=request, context={"N2Pred": NODULE, "orig_plot": img_str})
