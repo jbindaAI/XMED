@@ -43,7 +43,7 @@ def home(request: Request):
 
 
 @app.get("/visualize_nodule/{NODULE}", response_class=HTMLResponse)
-def visualize_nodule(request: Request, NODULE: str, SLC: int=Query(15, gt=-1, le=32)):
+def visualize_nodule(request: Request, NODULE: str, SLC: int=Query(15, gt=-1, le=31)):
     # loading and visualizing nodule
     original_img = load_img(crop_path=f"data/crops/{NODULE}.pt", crop_view="axial", slice_=SLC, return_both=False, device="cpu")
     img_str = plot_nodule(original_img)
@@ -52,12 +52,13 @@ def visualize_nodule(request: Request, NODULE: str, SLC: int=Query(15, gt=-1, le
         name="home.html", request=request, context={"NODULE": NODULE, "SLC":SLC,"orig_plot": img_str})
 
 
-@app.get("/predict/{NODULE}", response_class=HTMLResponse)
-def predict(request: Request, NODULE: str):
-    original_img, attention_map, CDAM_maps = XMED.model_pipeline(NODULE=NODULE, SLICE=16, TASK="Regression")
+@app.get("/predict/{NODULE}/{SLICE}", response_class=HTMLResponse)
+def predict(request: Request, NODULE: str, SLICE: int, TASK: str=Query(...)):
+    print(TASK)
+    original_img, attention_map, CDAM_maps = XMED.model_pipeline(NODULE=NODULE, SLICE=SLICE, TASK=TASK)
     print("INFERENCE SUCCESFULL!")
     img_str = plot_nodule(original_img)
     # There is need for continuation...
     
     return templates.TemplateResponse(
-        name="home.html", request=request, context={"NODULE": NODULE, "orig_plot": img_str})
+        name="home.html", request=request, context={"NODULE": NODULE, "SLC": SLICE, "orig_plot": img_str})
