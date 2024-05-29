@@ -35,7 +35,7 @@
                             </button>
                             <ul class="dropdown-menu">
                             {% for ID in PATIENT_IDs %}
-                              <li><a class="dropdown-item" href="#">Patient {{ID}}</a></li>
+                              <li><a class="dropdown-item" href="{{ url_for('visualize_scan', PATIENT_ID=ID) }}">Patient {{ID}}</a></li>
                             {% endfor %}
                             </ul>
                           </div>

@@ -11,7 +11,6 @@
 </head>
 
 <body>
-    <!-- Header with project name (as logo) and link to About page. -->
     <div class="container">
         <header class="d-flex flex-wrap justify-content-center py-3 mb-4 border-bottom">
             <a href="{{  url_for('home') }}"
@@ -32,19 +31,19 @@
                         </button>
                         <ul class="dropdown-menu">
                             {% for ID in PATIENT_IDs %}
-                            <li><a class="dropdown-item" href="{{ url_for('visualize_dicom', PATIENT_ID=ID)}}">Patient
+                            <li><a class="dropdown-item" href="{{ url_for('visualize_scan', PATIENT_ID=ID)}}">Patient
                                     {{ ID }}</a></li>
                             {% endfor %}
                         </ul>
                     </div>
                     <div class="row mt-3 form-group">
                         <h3>Choose scan's slice</h3>
-                        <form action="{{ url_for('visualize_dicom', PATIENT_ID=PATIENT_ID) }}" method="get">
+                        <form action="{{ url_for('visualize_scan', PATIENT_ID=PATIENT_ID) }}" method="get">
                             <div class="col-md-12">
-                                <input type="range" class="form-range" name="SLICE" min="0" max="{{ max_depth }}"
-                                    step="1" id="sliceNumber" value="{{SLICE}}"
+                                <input type="range" class="form-range" name="SLC" min="0" max="{{ max_depth }}"
+                                    step="1" id="sliceNumber" value="{{SLC}}"
                                     oninput="sliceOutput.value = sliceNumber.value" onchange="this.form.submit()">
-                                <p>Chosen slice: <output id="sliceOutput">{{ SLICE }}</output></p>
+                                <p>Chosen slice: <output id="sliceOutput">{{ SLC }}</output></p>
                             </div>
                         </form>
                     </div>
@@ -56,19 +55,11 @@
                 <div class="col-md-8">
                     <div class="title-container">
                         <h3>Scan visualization</h3>
-                        <img src="data:image/png;base64,{{ SCAN }}" class="img-fluid" alt="Scan slice">
+                        <img src="data:image/png;base64,{{ scan_plot }}" class="img-fluid" alt="Scan slice">
                     </div>
                 </div>
             </div>
         </div>
-        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Previous</span>
-        </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#carouselExample" data-bs-slide="next">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Next</span>
-        </button>
     </main>
 
     <div class="container">

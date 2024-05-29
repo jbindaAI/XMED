@@ -11,7 +11,9 @@ import pickle
 import io
 import base64
 import torch
-import pandas as pd
+import pylidc as pl
+import torchio as tio
+import os
 
 
 app = FastAPI()
@@ -96,21 +98,66 @@ def plot_nodule(original_img:torch.Tensor)->str:
     return img_str
 
 
+def load_dicom_into_tensor(patient_id: str)->torch.Tensor:
+    if patient_id+".pt" not in os.listdir("cache/"):
+        scan = pl.query(pl.Scan).filter(pl.Scan.patient_id == f"LIDC-IDRI-{patient_id}").first()
+        dicom = scan.get_path_to_dicom_files()
+        tio_image = tio.ScalarImage(dicom)
+        transform = tio.Resample(1)
+        res_image = transform(tio_image)
+        res_data = torch.movedim(res_image.data, (0,1,2,3), (0,2,1,3)).squeeze()
+        with open(f"cache/{patient_id}.pt", "wb") as file:
+            torch.save(res_data, file)     
+    else:
+        with open(f"cache/{patient_id}.pt", "rb") as file:
+            res_data = torch.load(file)
+    return res_data
+
+
+def plot_scan(scan_pt:torch.Tensor, slc:int)->str:
+    plt.figure(figsize=(5,5))
+    plt.set_cmap('gray')
+    plt.imshow(scan_pt[:, :, slc])
+    plt.axis("off")
+
+    buf = io.BytesIO()
+    plt.savefig(buf, format="png", transparent=True)
+    buf.seek(0)
+
+    img_str = base64.b64encode(buf.read()).decode('utf-8')
+    plt.close()
+    return img_str
+
+
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request):
     return templates.TemplateResponse(
         name="home.html", request=request, context={"PATIENT_IDs":PATIENT_IDs})
 
 
+@app.get("/visualize_scan/{PATIENT_ID}", response_class=HTMLResponse)
+def visualize_scan(request: Request, PATIENT_ID: str, SLC: int=Query(150)):
+    scan_pt = load_dicom_into_tensor(patient_id=PATIENT_ID)
+    max_depth = scan_pt.shape[-1]
+    scan_str = plot_scan(scan_pt=scan_pt, slc=SLC)
 
-# @app.get("/", response_class=HTMLResponse)
-# def home(request: Request):
-#     # Loading exemplary original image:
-#     original_img = load_img(crop_path="data/crops/0567.pt", crop_view="axial", slice_=15, return_both=False, device="cpu")
-#     img_str = plot_nodule(original_img)
+    return templates.TemplateResponse(
+        name="scan_slicer.html", request=request, context={"PATIENT_IDs":PATIENT_IDs,
+                                                    "PATIENT_ID":PATIENT_ID, 
+                                                    "SLC": SLC,
+                                                    "max_depth": max_depth,
+                                                    "scan_plot": scan_str})
 
-#     return templates.TemplateResponse(
-#         name="home.html", request=request, context={"NODULE": "0567", "SLC":15, "orig_plot": img_str})
+
+@app.get("/extract_nodules/{PATIENT_ID}", response_class=HTMLResponse)
+def extract_nodules(request: Request, PATIENT_ID: str):
+    NODULES = [elt for elt in range(5)]
+
+    return templates.TemplateResponse(
+        name="nodules_list.html", request=request, context={"PATIENT_IDs":PATIENT_IDs,
+                                                    "PATIENT_ID":PATIENT_ID,
+                                                    "NODULES":NODULES
+                                                    })
 
 
 @app.get("/visualize_nodule/{NODULE}", response_class=HTMLResponse)
