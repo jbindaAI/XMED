@@ -14,7 +14,7 @@
     <!-- Header with project name (as logo) and link to About page. -->
     <div class="container">
         <header class="d-flex flex-wrap justify-content-center py-3 mb-4 border-bottom">
-            <a href="{{ url_for('home') }}" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-dark text-decoration-none">
+            <a href="{{ url_for('home') }}" class="d-flex align-items-center mb-3 mb-md-auto text-dark text-decoration-none">
                 <span class="fs-4"><span class="logo-x">X</span><span class="logo-med">MED</span></span>
             </a>
         </header>
@@ -35,10 +35,25 @@
                             </button>
                             <ul class="dropdown-menu">
                             {% for ID in PATIENT_IDs %}
-                              <li><a class="dropdown-item" href="{{ url_for('visualize_scan', PATIENT_ID=ID) }}">Patient {{ID}}</a></li>
+                              <li><a class="dropdown-item" onclick="showLoadingModal()" href="{{ url_for('visualize_scan', PATIENT_ID=ID) }}">Patient {{ID}}</a></li>
                             {% endfor %}
                             </ul>
                           </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Modal -->
+        <div class="modal fade" id="loadingModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="loadingModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-body d-flex justify-content-center align-items-center">
+                        <div>
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p>Loading, please wait...</p>
                         </div>
                     </div>
                 </div>
@@ -61,5 +76,11 @@
         </footer>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script>
+        function showLoadingModal() {
+            var myModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+            myModal.show();
+        }
+    </script>
 </body>
 </html>

@@ -32,35 +32,13 @@
                 </div>
                 <!-- Options -->
                 <div class="col-md-6">
-                    <!-- First row of buttons -->
-                    <div class="row mb-2 mt-3">
-                        <h3>Choose nodule example</h3>
-                        <div class="col-md-3 offset-1 text-center">
-                            <a href="{{ url_for('visualize_nodule', NODULE='0567') }}" class="btn btn-primary btn-block {% if NODULE == '0567' %}btn-success{% else %}btn-primary{% endif %}">Nodule 1</a>
-                        </div>
-                        <div class="col-md-3 text-center">
-                            <a href="{{ url_for('visualize_nodule', NODULE='0303') }}" class="btn btn-primary btn-block {% if NODULE == '0303' %}btn-success{% else %}btn-primary{% endif %}">Nodule 2</a>
-                        </div>
-                        <div class="col-md-3 text-center">
-                            <a href="{{ url_for('visualize_nodule', NODULE='0065') }}" class="btn btn-primary btn-block {% if NODULE == '0065' %}btn-success{% else %}btn-primary{% endif %}">Nodule 3</a>
-                        </div>
-                    </div>
-                    <!-- Second row of buttons -->
-                    <div class="row mb-2">
-                        <div class="col-md-3 offset-1 text-center">
-                            <a href="{{ url_for('visualize_nodule', NODULE='0075') }}" class="btn btn-primary btn-block {% if NODULE == '0075' %}btn-success{% else %}btn-primary{% endif %}">Nodule 4</a>
-                        </div>
-                        <div class="col-md-3 text-center">
-                            <a href="{{ url_for('visualize_nodule', NODULE='0077') }}" class="btn btn-primary btn-block {% if NODULE == '0077' %}btn-success{% else %}btn-primary{% endif %}">Nodule 5</a>
-                        </div>
-                        <div class="col-md-3 text-center">
-                            <a href="{{ url_for('visualize_nodule', NODULE='0222') }}" class="btn btn-primary btn-block {% if NODULE == '0222' %}btn-success{% else %}btn-primary{% endif %}">Nodule 6</a>
-                        </div>
-                    </div>
                     <!-- Slice number input -->
                     <div class="row mt-3 form-group">
+                        <div>
+                            <a href="{{ url_for('list_nodules') }}" class="btn btn-primary">Return to nodules</a>
+                        </div>
                         <h3>Choose nodule slice</h3>
-                        <form action="{{ url_for('visualize_nodule', NODULE=NODULE) }}" method="get">
+                        <form action="{{ url_for('visualize_nodule', NOD_crop=NOD_crop) }}" method="get">
                             <div class="col-md-9 offset-1">
                                 <input type="range" class="form-range" name="SLC" min="0" max="31" step="1" id="sliceNumber" value="{{SLC}}" oninput="sliceOutput.value = sliceNumber.value" onchange="this.form.submit()">
                                 <p>Chosen slice: <output id="sliceOutput">{{ SLC }}</output></p>
@@ -71,7 +49,7 @@
                         <h3>Choose prediction mode</h3>
                         <div class="col-md-9 offset-1 text-center">
                             <div class="btn-group-horizontal" role="group" aria-label="Horizontal radio toggle button group">
-                                <form action="{{  url_for('predict', NODULE=NODULE, SLICE=SLC) }}" method="get">
+                                <form action="{{  url_for('predict', NODULE=NOD_crop, SLICE=SLC) }}" method="get">
                                     <input type="radio" class="btn-check" name="TASK" id="button1" value="Classification" autocomplete="off" required>
                                     <label class="btn btn-outline-primary" for="button1">Classification</label>
                                     <input type="radio" class="btn-check" name="TASK" id="button2" value="Regression" autocomplete="off" required>
@@ -98,10 +76,12 @@
                     </div>
                     <div class="col-md-2">
                         {% if TASK == "Classification"  %}
+                        <!--
                         <h4> True diagnosis: </h4>
                         <div>
                             <strong> {% if GROUND_TRUTH == 1  %} MALIGNANT {%  else  %} BENIGN {%  endif  %} </strong>
                         </div>
+                        -->
                         <h4> Predicted status </h4>
                         <strong> {% if PREDS > 0.5  %} MALIGNANT {%  else  %} BENIGN {%  endif  %}</strong>
                         <p> Probability of malignancy: </p>

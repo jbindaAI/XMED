@@ -19,13 +19,21 @@ import os
 import numpy as np
 from typing import List, Tuple
 
+# Cleaning cache:
+for file in os.listdir("cache/"):
+    if file != "crops":
+        os.remove(f"cache/{file}")
+        
+for file in os.listdir("cache/crops/"):
+    os.remove(f"cache/crops/{file}")
+
 
 app = FastAPI()
 
 templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# Loading ground truth data, to compare with predictions:
+# Loading annotations for all dataset
 with open("data/ALL_annotations_df.pkl", "rb") as file:
     ann_df = pickle.load(file)
 
@@ -86,7 +94,7 @@ def plot_results(original, maps):
     plt.close()
     return res_str
 
-
+## Tutaj należałoby trochę poprawić, by lepiej współpracowało z process_nodule
 def plot_nodule(original_img:torch.Tensor)->str:
     plt.figure(figsize=(3.5,3.5))
     plt.set_cmap('gray')
@@ -175,7 +183,7 @@ def process_nodules(nodules: List, PATIENT_ID: str)->Tuple[List, List]:
             central_slc_str = plot_nodule(crop[:, :, 16].unsqueeze(-1))
             NOD_icons_lst.append(central_slc_str)
 
-            with open(f"cache/crops/{PATIENT_ID}_{n}", "wb") as file:
+            with open(f"cache/crops/{PATIENT_ID}_{n}.pt", "wb") as file:
                 torch.save(crop, file)
                 NOD_crops_ref.append(f"{PATIENT_ID}_{n}")
             n += 1
@@ -207,23 +215,47 @@ def extract_nodules(request: Request, PATIENT_ID: str):
     scan = pl.query(pl.Scan).filter(pl.Scan.patient_id == f"LIDC-IDRI-{PATIENT_ID}").first()
     nodules = scan.cluster_annotations()
     NOD_icons_lst, NOD_crops_ref = process_nodules(nodules=nodules, PATIENT_ID=PATIENT_ID)
+    NODULES=zip(NOD_icons_lst, NOD_crops_ref)
+    # caching NODULES to retrieve later:
+    with open("cache/nodules_lst.pkl", "wb") as file:
+        pickle.dump(NODULES, file)
 
     return templates.TemplateResponse(
         name="nodules_list.html", request=request, context={"PATIENT_IDs":PATIENT_IDs,
-                                                    "PATIENT_ID":PATIENT_ID,
-                                                    "NOD_icons":NOD_icons_lst,
-                                                    "NOD_crops_ref":NOD_crops_ref 
+                                                    "NODULES": NODULES
                                                     })
 
 
-@app.get("/visualize_nodule/{NODULE}", response_class=HTMLResponse)
-def visualize_nodule(request: Request, NODULE: str, SLC: int=Query(15, gt=-1, le=31)):
+@app.get("/list_nodules/", response_class=HTMLResponse)
+def list_nodules(request: Request):
+    with open("cache/nodules_lst.pkl", "rb") as file:
+        NODULES = pickle.load(file)
+    return templates.TemplateResponse(
+        name="nodules_list.html", request=request, context={"PATIENT_IDs":PATIENT_IDs,
+                                                    "NODULES": NODULES
+                                                    })
+
+
+@app.get("/visualize_nodule/{NOD_crop}", response_class=HTMLResponse)
+def visualize_nodule(request: Request, NOD_crop: str, SLC: int=Query(15, gt=-1, le=31)):
+    # when user decide to analyze Nodule, it deletes cached tensors of patients scans other than chosen one.
+    cached_files = os.listdir("cache/")
+    for file in cached_files:
+        if file != "crops" and file != "nodules_lst.pkl":
+            os.remove("cache/"+file)
     # loading and visualizing nodule
-    original_img = load_img(crop_path=f"data/crops/{NODULE}.pt", crop_view="axial", slice_=SLC, return_both=False, device="cpu")
+    original_img = load_img(crop_path=f"cache/crops/{NOD_crop}.pt", crop_view="axial", slice_=SLC, return_both=False, device="cpu")
     img_str = plot_nodule(original_img)
 
+    # Context to return to Nodule lst:
+    with open("cache/nodules_lst.pkl", "rb") as file:
+        NODULES = pickle.load(file)
+
     return templates.TemplateResponse(
-        name="home.html", request=request, context={"NODULE": NODULE, "SLC":SLC,"orig_plot": img_str})
+        name="nodule_slicer.html", request=request, context={"NOD_crop": NOD_crop,
+                                                             "SLC":SLC,
+                                                             "NODULES": NODULES,
+                                                             "orig_plot": img_str})
 
 
 @app.get("/predict/{NODULE}/{SLICE}", response_class=HTMLResponse)
@@ -232,23 +264,16 @@ def predict(request: Request, NODULE: str, SLICE: int, TASK: str=Query(...)):
     img_str = plot_nodule(original_img)
     res_str = plot_results(original=original_img, maps=[attention_map, CDAM_maps])
 
-    # Taking ground truth label:
-    nodule_anns = ann_df.loc[ann_df["path"]==NODULE+".pt"]
     if TASK == "Classification":
-        GROUND_TRUTH = int(nodule_anns["target"].iloc[0])
         PREDS = round(model_output, 2)
     else:
-        features = ['subtlety', 'internalStructure', 'calcification', 'sphericity',
-                    'margin', 'lobulation', 'spiculation', 'texture', 'diameter']
-        GROUND_TRUTH = nodule_anns[features]
         PREDS = model_output
 
 
     return templates.TemplateResponse(
-        name="home.html", request=request, context={"NODULE": NODULE, 
+        name="nodule_slicer.html", request=request, context={"NOD_crop": NODULE, 
                                                     "SLC": SLICE, 
                                                     "TASK": TASK,
-                                                    "GROUND_TRUTH": GROUND_TRUTH,
                                                     "PREDS": PREDS,  
                                                     "orig_plot": img_str, 
                                                     "res_plot": res_str})
