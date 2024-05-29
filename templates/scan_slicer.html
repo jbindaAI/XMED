@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>XMED</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link href="{{ url_for('static', path='/styles.css') }}" rel="stylesheet">
+</head>
+
+<body>
+    <!-- Header with project name (as logo) and link to About page. -->
+    <div class="container">
+        <header class="d-flex flex-wrap justify-content-center py-3 mb-4 border-bottom">
+            <a href="{{  url_for('home') }}"
+                class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-dark text-decoration-none">
+                <span class="fs-4"><span class="logo-x">X</span><span class="logo-med">MED</span></span>
+            </a>
+        </header>
+    </div>
+
+    <main>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                            Change patient
+                        </button>
+                        <ul class="dropdown-menu">
+                            {% for ID in PATIENT_IDs %}
+                            <li><a class="dropdown-item" href="{{ url_for('visualize_dicom', PATIENT_ID=ID)}}">Patient
+                                    {{ ID }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div class="row mt-3 form-group">
+                        <h3>Choose scan's slice</h3>
+                        <form action="{{ url_for('visualize_dicom', PATIENT_ID=PATIENT_ID) }}" method="get">
+                            <div class="col-md-12">
+                                <input type="range" class="form-range" name="SLICE" min="0" max="{{ max_depth }}"
+                                    step="1" id="sliceNumber" value="{{SLICE}}"
+                                    oninput="sliceOutput.value = sliceNumber.value" onchange="this.form.submit()">
+                                <p>Chosen slice: <output id="sliceOutput">{{ SLICE }}</output></p>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="col-md-12">
+                        <a href="{{ url_for('extract_nodules', PATIENT_ID=PATIENT_ID) }}"
+                            class="btn btn-primary btn-block "> Extract Nodules!</a>
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <div class="title-container">
+                        <h3>Scan visualization</h3>
+                        <img src="data:image/png;base64,{{ SCAN }}" class="img-fluid" alt="Scan slice">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#carouselExample" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
+    </main>
+
+    <div class="container">
+        <!-- Website footer -->
+        <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
+            <p class="col-md-4 mb-0 footer-text">&copy; 2024 XMED</p>
+
+            <a href="/"
+                class="col-md-4 d-flex align-items-center justify-content-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none">
+                <span class="fs-4"><span class="logo-x">X</span><span class="logo-med">MED</span></span>
+            </a>
+
+            <ul class="nav col-md-4 justify-content-end">
+                <li class="nav-item"><a href="#" class="nav-link px-2 footer-link">About</a></li>
+            </ul>
+        </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"
+        integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+        integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>
