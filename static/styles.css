@@ -1,5 +1,11 @@
 /* styles.css */
 
+/* HOME */
+.dropdown-menu{
+    max-height: 200px;
+    overflow-y: scroll;
+}
+
 /* HEADER */
 .logo-x {
     font-weight: bold;

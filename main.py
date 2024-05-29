@@ -19,9 +19,15 @@ app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# Loading ground truth data, to compare with predictions.
+# Loading ground truth data, to compare with predictions:
 with open("data/ALL_annotations_df.pkl", "rb") as file:
     ann_df = pickle.load(file)
+
+# Loading list of available Patients:
+with open("data/match_ALL_df.pkl", "rb") as file:
+    match_df = pickle.load(file)
+    PATIENT_IDs = list(match_df[0])
+    PATIENT_IDs = list(dict.fromkeys(PATIENT_IDs))
 
 
 def plot_results(original, maps):
@@ -92,12 +98,19 @@ def plot_nodule(original_img:torch.Tensor)->str:
 
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request):
-    # Loading exemplary original image:
-    original_img = load_img(crop_path="data/crops/0567.pt", crop_view="axial", slice_=15, return_both=False, device="cpu")
-    img_str = plot_nodule(original_img)
-
     return templates.TemplateResponse(
-        name="home.html", request=request, context={"NODULE": "0567", "SLC":15, "orig_plot": img_str})
+        name="home.html", request=request, context={"PATIENT_IDs":PATIENT_IDs})
+
+
+
+# @app.get("/", response_class=HTMLResponse)
+# def home(request: Request):
+#     # Loading exemplary original image:
+#     original_img = load_img(crop_path="data/crops/0567.pt", crop_view="axial", slice_=15, return_both=False, device="cpu")
+#     img_str = plot_nodule(original_img)
+
+#     return templates.TemplateResponse(
+#         name="home.html", request=request, context={"NODULE": "0567", "SLC":15, "orig_plot": img_str})
 
 
 @app.get("/visualize_nodule/{NODULE}", response_class=HTMLResponse)
