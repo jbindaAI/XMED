@@ -12,8 +12,12 @@ import io
 import base64
 import torch
 import pylidc as pl
+from pylidc.utils import consensus
+from scipy import ndimage
 import torchio as tio
 import os
+import numpy as np
+from typing import List, Tuple
 
 
 app = FastAPI()
@@ -99,17 +103,20 @@ def plot_nodule(original_img:torch.Tensor)->str:
 
 
 def load_dicom_into_tensor(patient_id: str)->torch.Tensor:
-    if patient_id+".pt" not in os.listdir("cache/"):
+    if "dt_" + patient_id+".pt" not in os.listdir("cache/"):
         scan = pl.query(pl.Scan).filter(pl.Scan.patient_id == f"LIDC-IDRI-{patient_id}").first()
         dicom = scan.get_path_to_dicom_files()
         tio_image = tio.ScalarImage(dicom)
+        spacing = tio_image.spacing
         transform = tio.Resample(1)
         res_image = transform(tio_image)
         res_data = torch.movedim(res_image.data, (0,1,2,3), (0,2,1,3)).squeeze()
-        with open(f"cache/{patient_id}.pt", "wb") as file:
+        with open(f"cache/spc_{patient_id}.pkl", "wb") as f:
+            pickle.dump(spacing, f)
+        with open(f"cache/dt_{patient_id}.pt", "wb") as file:
             torch.save(res_data, file)     
     else:
-        with open(f"cache/{patient_id}.pt", "rb") as file:
+        with open(f"cache/dt_{patient_id}.pt", "rb") as file:
             res_data = torch.load(file)
     return res_data
 
@@ -127,6 +134,52 @@ def plot_scan(scan_pt:torch.Tensor, slc:int)->str:
     img_str = base64.b64encode(buf.read()).decode('utf-8')
     plt.close()
     return img_str
+
+
+def process_nodules(nodules: List, PATIENT_ID: str)->Tuple[List, List]:
+    with open(f"cache/spc_{PATIENT_ID}.pkl", "rb") as f:
+        spacing = pickle.load(f)
+    with open(f"cache/dt_{PATIENT_ID}.pt", "rb") as f:
+        res_data = torch.load(f)
+    NOD_icons_lst = []
+    NOD_crops_ref = []
+    n=1
+    for nodule in nodules:
+        #quality control:
+        num_annotations=len(nodule)
+        if num_annotations > 4:
+            continue
+        median_malig = np.median([ann.malignancy for ann in nodule])
+        if median_malig == 3:
+            continue
+        if (num_annotations > 2 and num_annotations <= 4):
+            cmask, cbbox, _ = consensus(nodule, clevel=0.5)
+            res_cbbox = [(round(cbbox[i].start*spacing[i]),
+                        round(cbbox[i].stop*spacing[i])) for i in range(3)]
+            res_cmask = ndimage.zoom(cmask.astype(int), spacing)
+            res_cbbox0 = [round((res_cbbox[i][0]+res_cbbox[i][1])/2) for i in range(3)]
+            g = np.zeros(res_data.shape)
+            g[res_cbbox[0][0]:res_cbbox[0][0]+res_cmask.shape[0],
+            res_cbbox[1][0]:res_cbbox[1][0]+res_cmask.shape[1],
+            res_cbbox[2][0]:res_cbbox[2][0]+res_cmask.shape[2],] = res_cmask
+            # Nodule surrounding volume of dimmensions (32,32,32)==(2k,2k,2k) is extracted.
+            k = int(32/2)
+            slices = (
+                slice(res_cbbox0[0]-k, res_cbbox0[0]+k),
+                slice(res_cbbox0[1]-k, res_cbbox0[1]+k),
+                slice(res_cbbox0[2]-k, res_cbbox0[2]+k)
+                )
+            crop = res_data[slices]
+
+            # it will be used as icon
+            central_slc_str = plot_nodule(crop[:, :, 16].unsqueeze(-1))
+            NOD_icons_lst.append(central_slc_str)
+
+            with open(f"cache/crops/{PATIENT_ID}_{n}", "wb") as file:
+                torch.save(crop, file)
+                NOD_crops_ref.append(f"{PATIENT_ID}_{n}")
+            n += 1
+    return (NOD_icons_lst, NOD_crops_ref)
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -151,12 +204,15 @@ def visualize_scan(request: Request, PATIENT_ID: str, SLC: int=Query(150)):
 
 @app.get("/extract_nodules/{PATIENT_ID}", response_class=HTMLResponse)
 def extract_nodules(request: Request, PATIENT_ID: str):
-    NODULES = [elt for elt in range(5)]
+    scan = pl.query(pl.Scan).filter(pl.Scan.patient_id == f"LIDC-IDRI-{PATIENT_ID}").first()
+    nodules = scan.cluster_annotations()
+    NOD_icons_lst, NOD_crops_ref = process_nodules(nodules=nodules, PATIENT_ID=PATIENT_ID)
 
     return templates.TemplateResponse(
         name="nodules_list.html", request=request, context={"PATIENT_IDs":PATIENT_IDs,
                                                     "PATIENT_ID":PATIENT_ID,
-                                                    "NODULES":NODULES
+                                                    "NOD_icons":NOD_icons_lst,
+                                                    "NOD_crops_ref":NOD_crops_ref 
                                                     })
 
 
