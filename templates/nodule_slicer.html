@@ -27,7 +27,7 @@
                 <div class="col-md-12">
                     <a href="{{ url_for('list_nodules') }}" class="btn btn-secondary">Return to nodules list</a>
                 </div>
-                <div class="col-lg-4 col-md-12 offset-lg-2">
+                <div class="col-lg-4 col-md-12 {% if not reg_att_plot %}offset-lg-2{% else %}ms-auto{% endif %}">
                     <!-- Slice number input -->
                     <div class="row mt-3 form-group options">
                         <div class="col-md-12">
@@ -58,37 +58,49 @@
                     </div>
                 </div>
                 <!-- CT slices visualization -->
-                <div class="col-lg-4 col-md-12 image-box">
+                <div class="col-lg-3 col-md-12 image-box">
                     <div class="title-container">
                         <h3>Nodule's slice</h3>
                         <img src="data:image/png;base64,{{ orig_plot }}" class="img-fluid" alt="Nodule slice">
                     </div>
                 </div>
+                <!-- Attention visualization -->
+                {% if reg_att_plot %}
+                <div class="col-lg-3 col-md-12 ms-lg-3 me-auto image-box">
+                    <div class="title-container">
+                        <h3>Attention map</h3>
+                        <img src="data:image/png;base64,{{ reg_att_plot }}" class="img-fluid" alt="Attention map">
+                    </div>
+                </div>
+                {% else %}
+                {% endif %}
             </div>
 
             {% if res_plot %}
             <!-- Plotting Results -->
-            <div class="col-md-12 mt-4">
+            <div class="col-md-9 col-lg-8 mt-4 ms-auto me-auto">
                 <div class="row image-box">
+                    {% if TASK == "Regression" %}
                     <h2>CDAM scores</h2>
                     <div class="col-md-12">
                         <div class="title-container">
                             <img src="data:image/png;base64,{{ res_plot }}" class="img-fluid" alt="Plot of resulting maps">
                         </div>
                     </div>
-                    <!--
-                    <div class="col-md-2">
-                        {% if TASK == "Classification"  %}
-
-                        <h4> Predicted status </h4>
-                        <strong> {% if PREDS > 0.5  %} MALIGNANT {%  else  %} BENIGN {%  endif  %}</strong>
-                        <p> Probability of malignancy: </p>
-                        <div>
-                            {{  PREDS  }}
+                    {% else %}
+                    <h2>Results</h2>
+                    <div class="col-md-9 col-lg-8">
+                        <div class="title-container">
+                            <img src="data:image/png;base64,{{ res_plot }}" class="img-fluid" alt="Plot of resulting maps">
                         </div>
-                        {%  endif  %}
                     </div>
-                    -->
+                    <div class="col-md-3 col-lg-4 class_pred">
+                        <h4 class="mt-md-3 mt-lg-5">Predicted status:</h4>
+                        <p><strong> {% if PREDS > 0.5  %} MALIGNANT {%  else  %} BENIGN {%  endif  %}</strong></p>
+                        <p class="mt-3"> Probability of malignancy: </p>
+                        <p>{{  PREDS  }}</p>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
             {% endif %}
@@ -102,7 +114,7 @@
                             <div class="spinner-border text-primary" role="status">
                                 <span class="visually-hidden">Loading...</span>
                             </div>
-                            <p>Analysis in progres, please wait...</p>
+                            <p>Analysis in progress, please wait...</p>
                         </div>
                     </div>
                 </div>

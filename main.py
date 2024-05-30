@@ -48,7 +48,7 @@ with open("data/match_ALL_df.pkl", "rb") as file:
     PATIENT_IDs = list(dict.fromkeys(PATIENT_IDs))
 
 
-def plot_results(original, maps, preds):
+def plot_res_class(maps):
     """Using matplotlib, plot the original image and the relevance maps"""
     maps2plot=[]
     target_names=[]
@@ -56,61 +56,94 @@ def plot_results(original, maps, preds):
     target_names.append("Attention Map")
     for key in maps[1].keys():
         maps2plot.append(maps[1][key])
-        target_names.append(key)
+        target_names.append("CDAM score")
 
     if len(maps2plot) == 2:
         # Binary classification:
-        plt.figure(figsize=(12.5, 3.75))
-        num_plots = 3
-        plt.subplot(1, num_plots, 1)
-        plt.imshow(original[:, :, 0])
-        plt.set_cmap('gray')
-        plt.axis("off")
+        plt.figure(figsize=(6,3))
+        num_plots = 2
         for i, m in enumerate(maps2plot):
-            plt.subplot(1, num_plots, i + 2)
+            plt.subplot(1, num_plots, i + 1, title=target_names[i])
             plt.imshow(m, cmap=get_cmap(m))
             plt.axis("off")
         plt.subplots_adjust(wspace=0.005, hspace=0)
-
-    elif len(maps2plot) == 9:
-        # Biomarker Regression:
-        fig, axs = plt.subplots(4, 4, figsize=(10, 10))
-
-        # Plotting attention map and CDAM scores:
-        k = 1
-        for i in [0, 2]:
-            for j in range(4):
-                axs[i][j].imshow(maps2plot[k], cmap=get_cmap(maps2plot[k]))
-                axs[i][j].set_title(target_names[k])
-                k += 1
-        k = 1
-        for i in [1, 3]:
-            for j in range(4):
-                sns.histplot(ann_df, 
-                             x=target_names[k].lower(), 
-                             kde=True,
-                             bins=16, 
-                             stat="percent", 
-                             ax=axs[i][j])
-                axs[i][j].axvline(x=preds[target_names[k]], 
-                                  color='red', 
-                                  linestyle='--', 
-                                  linewidth=2,
-                                  label=r'$\hat{y}$'
-                                  )
-                axs[i][j].set_title(target_names[k] + "=" + str(preds[target_names[k]]))
-                axs[i][j].legend()
-                k += 1
-        fig.tight_layout()
-
     
+    buf = io.BytesIO()
+    plt.savefig(buf, format="png", transparent=True, bbox_inches='tight')
+    buf.seek(0)
+    res_str = base64.b64encode(buf.read()).decode('utf-8')
+    plt.close()
+    return res_str
+
+
+def plot_CDAM_reg(maps, preds):
+    """Using matplotlib, plot the original image and the relevance maps"""
+    maps2plot=[]
+    target_names=[]
+    for key in maps[0].keys():
+        maps2plot.append(maps[0][key])
+        target_names.append(key)
+
+    # Biomarker Regression:
+    fig, axs = plt.subplots(4, 4, figsize=(10, 10))
+
+    # Plotting CDAM scores:
+    k = 0
+    for i in [0, 2]:
+        for j in range(4):
+            axs[i][j].imshow(maps2plot[k], cmap=get_cmap(maps2plot[k]))
+            axs[i][j].set_title(target_names[k])
+            axs[i][j].tick_params(axis='both', 
+                                  which='both', 
+                                  bottom=False, 
+                                  left=False,
+                                  labelbottom=False,
+                                  labelleft=False
+                                  )
+            k += 1
+    k = 0
+    for i in [1, 3]:
+        for j in range(4):
+            sns.histplot(ann_df,
+                         x=target_names[k].lower(),
+                         kde=True,
+                         bins=16,
+                         stat="percent",
+                         ax=axs[i][j])
+            axs[i][j].axvline(x=preds[target_names[k]],
+                              color='red',
+                              linestyle='--',
+                              linewidth=2,
+                              label=r'$\hat{y}$'
+                              )
+            axs[i][j].set_title(target_names[k] + "=" + str(preds[target_names[k]]))
+            axs[i][j].legend()
+            k += 1
+    fig.tight_layout()
+
+    buf = io.BytesIO()
+    plt.savefig(buf, format="png", transparent=True, bbox_inches='tight')
+    buf.seek(0)
+
+    res_str_CDAM = base64.b64encode(buf.read()).decode('utf-8')
+    plt.close()
+    return res_str_CDAM
+
+
+def plot_att_reg(attention_map):
+    plt.figure(figsize=(3.3,3.3))
+    plt.imshow(attention_map, cmap=get_cmap(attention_map))
+    plt.axis("off")
+
     buf = io.BytesIO()
     plt.savefig(buf, format="png", transparent=True)
     buf.seek(0)
 
-    res_str = base64.b64encode(buf.read()).decode('utf-8')
+    res_str_att_reg = base64.b64encode(buf.read()).decode('utf-8')
     plt.close()
-    return res_str
+
+    return res_str_att_reg
+
 
 ## Tutaj należałoby trochę poprawić, by lepiej współpracowało z process_nodule
 def plot_nodule(original_img:torch.Tensor)->str:
@@ -210,6 +243,7 @@ def process_nodules(nodules: List, PATIENT_ID: str)->Tuple[List, List]:
 
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request):
+    ### Rozważyć usunięcie funkcji czyszczącej cache!
     clean_cache()
     return templates.TemplateResponse(
         name="home.html", request=request, context={"PATIENT_IDs":PATIENT_IDs})
@@ -283,12 +317,14 @@ def predict(request: Request, NODULE: str, SLICE: int, TASK: str=Query(...)):
 
     if TASK == "Classification":
         PREDS = round(model_output, 2)
+        res_str = plot_res_class(maps=[attention_map, CDAM_maps])
+        res_str_att = False
     else:
         PREDS = model_output
+        res_str = plot_CDAM_reg(maps=[CDAM_maps], preds=PREDS)
+        res_str_att = plot_att_reg(attention_map=attention_map)
 
     img_str = plot_nodule(original_img)
-    res_str = plot_results(original=original_img, maps=[attention_map, CDAM_maps], preds=PREDS)
-
 
     return templates.TemplateResponse(
         name="nodule_slicer.html", request=request, context={"NOD_crop": NODULE, 
@@ -296,4 +332,6 @@ def predict(request: Request, NODULE: str, SLICE: int, TASK: str=Query(...)):
                                                     "TASK": TASK,
                                                     "PREDS": PREDS,  
                                                     "orig_plot": img_str, 
-                                                    "res_plot": res_str})
+                                                    "res_plot": res_str,
+                                                    "reg_att_plot": res_str_att
+                                                    })
