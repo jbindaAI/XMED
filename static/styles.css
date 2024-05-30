@@ -34,17 +34,21 @@
 }
 
 .title-container {
-    margin-bottom: 10px; /* Adjust this value as needed */
+    margin-bottom: 5px; 
 }
 
 .title-container h3 {
-    margin-bottom: 5px; /* Adjust this value as needed */
+    margin-bottom: 0px; 
 }
 
 .title-container img {
-    margin-top: 5px; /* Adjust this value as needed */
+    margin-top: 0px; 
 }
 
+/* OPTIONS - nodule slicer */
+.options h3 {
+    margin-top: 1cm;
+}
 
 /* FOOTER */
 .footer-text {

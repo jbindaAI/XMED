@@ -14,18 +14,22 @@ import torch
 import pylidc as pl
 from pylidc.utils import consensus
 from scipy import ndimage
+import seaborn as sns
 import torchio as tio
 import os
 import numpy as np
 from typing import List, Tuple
 
-# Cleaning cache:
-for file in os.listdir("cache/"):
-    if file != "crops":
-        os.remove(f"cache/{file}")
-        
-for file in os.listdir("cache/crops/"):
-    os.remove(f"cache/crops/{file}")
+def clean_cache():
+    # Cleaning cache:
+    for file in os.listdir("cache/"):
+        if file != "crops":
+            os.remove(f"cache/{file}")
+            
+    for file in os.listdir("cache/crops/"):
+        os.remove(f"cache/crops/{file}")
+
+clean_cache()
 
 
 app = FastAPI()
@@ -44,7 +48,7 @@ with open("data/match_ALL_df.pkl", "rb") as file:
     PATIENT_IDs = list(dict.fromkeys(PATIENT_IDs))
 
 
-def plot_results(original, maps):
+def plot_results(original, maps, preds):
     """Using matplotlib, plot the original image and the relevance maps"""
     maps2plot=[]
     target_names=[]
@@ -70,19 +74,33 @@ def plot_results(original, maps):
 
     elif len(maps2plot) == 9:
         # Biomarker Regression:
-        fig, axs = plt.subplots(2, 5, figsize=(12.5, 5))
+        fig, axs = plt.subplots(4, 4, figsize=(10, 10))
 
         # Plotting attention map and CDAM scores:
-        k = 0
-        for i in range(2):
-            for j in range(5):
-                if i == 0 and j == 0:
-                    axs[0][0].imshow(original, cmap='gray')
-                    axs[0][0].set_title("Original Image")
-                else:
-                    axs[i][j].imshow(maps2plot[k], cmap=get_cmap(maps2plot[k]))
-                    axs[i][j].set_title(target_names[k])
-                    k += 1
+        k = 1
+        for i in [0, 2]:
+            for j in range(4):
+                axs[i][j].imshow(maps2plot[k], cmap=get_cmap(maps2plot[k]))
+                axs[i][j].set_title(target_names[k])
+                k += 1
+        k = 1
+        for i in [1, 3]:
+            for j in range(4):
+                sns.histplot(ann_df, 
+                             x=target_names[k].lower(), 
+                             kde=True,
+                             bins=16, 
+                             stat="percent", 
+                             ax=axs[i][j])
+                axs[i][j].axvline(x=preds[target_names[k]], 
+                                  color='red', 
+                                  linestyle='--', 
+                                  linewidth=2,
+                                  label=r'$\hat{y}$'
+                                  )
+                axs[i][j].set_title(target_names[k] + "=" + str(preds[target_names[k]]))
+                axs[i][j].legend()
+                k += 1
         fig.tight_layout()
 
     
@@ -96,7 +114,7 @@ def plot_results(original, maps):
 
 ## Tutaj należałoby trochę poprawić, by lepiej współpracowało z process_nodule
 def plot_nodule(original_img:torch.Tensor)->str:
-    plt.figure(figsize=(3.5,3.5))
+    plt.figure(figsize=(3.3,3.3))
     plt.set_cmap('gray')
     plt.imshow(original_img[:, :, 0])
     plt.axis("off")
@@ -192,6 +210,7 @@ def process_nodules(nodules: List, PATIENT_ID: str)->Tuple[List, List]:
 
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request):
+    clean_cache()
     return templates.TemplateResponse(
         name="home.html", request=request, context={"PATIENT_IDs":PATIENT_IDs})
 
@@ -261,13 +280,14 @@ def visualize_nodule(request: Request, NOD_crop: str, SLC: int=Query(15, gt=-1, 
 @app.get("/predict/{NODULE}/{SLICE}", response_class=HTMLResponse)
 def predict(request: Request, NODULE: str, SLICE: int, TASK: str=Query(...)):
     original_img, attention_map, CDAM_maps, model_output = XMED.model_pipeline(NODULE=NODULE, SLICE=SLICE, TASK=TASK)
-    img_str = plot_nodule(original_img)
-    res_str = plot_results(original=original_img, maps=[attention_map, CDAM_maps])
 
     if TASK == "Classification":
         PREDS = round(model_output, 2)
     else:
         PREDS = model_output
+
+    img_str = plot_nodule(original_img)
+    res_str = plot_results(original=original_img, maps=[attention_map, CDAM_maps], preds=PREDS)
 
 
     return templates.TemplateResponse(
