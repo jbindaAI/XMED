@@ -23,10 +23,6 @@ with open("data/fitted_mean_std.pkl", 'rb') as f:
 MEAN = dict_["mean"]
 STD = dict_["std"]
 
-### Fitted biomarker scaler object: --> byc może się przyda, by reverse transform.
-#with open("data/scaler.pkl", 'rb') as f:
-    #SCALER = pickle.load(f)
-
 
 # MAIN
 
@@ -80,7 +76,7 @@ def model_pipeline(NODULE: str, SLICE: int, TASK: Literal["Regression", "Classif
         get_gradient("last_att_in"))
 
     # Loading image from repository:
-    img, original_img = load_img(crop_path=f"data/crops/{NODULE}.pt", 
+    img, original_img = load_img(crop_path=f"cache/crops/{NODULE}.pt", 
                                  crop_view="axial", 
                                  slice_=SLICE,
                                  MEAN=MEAN,

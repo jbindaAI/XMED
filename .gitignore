@@ -1,6 +1,7 @@
 models/checkpoints/Biomarkers/*.ckpt
 models/checkpoints/End2End/*.ckpt
 data/*.pkl
+data/LIDC-IDRI
 data/crops/*.pt
 data/LIDC-IDRI
 venv/
@@ -8,4 +9,5 @@ __pycache__/
 models/__pycache__/
 static/*.png
 static/*.jpg
-cache
+cache/
+

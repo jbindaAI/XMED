@@ -14,7 +14,8 @@
     <!-- Header with project name (as logo) and link to About page. -->
     <div class="container">
         <header class="d-flex flex-wrap justify-content-center py-3 mb-4 border-bottom">
-            <a href="{{ url_for('home') }}" class="d-flex align-items-center mb-3 mb-md-auto text-dark text-decoration-none">
+            <a href="{{  url_for('home') }}"
+                class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-dark text-decoration-none">
                 <span class="fs-4"><span class="logo-x">X</span><span class="logo-med">MED</span></span>
             </a>
         </header>
@@ -22,23 +23,45 @@
 
     <main>
         <div class="container">
-            <div class="row justify-content-center align-items-center"> <!-- style="height: 100vh;" -->
-                <div class="col-md-6 d-flex justify-content-center">
-                    <div class="card" style="width: 18rem;">
-                        <img src="{{ url_for('static', path='chest_CT.jpg')}}" class="card-img-top" alt="...">
-                        <div class="card-body">
-                          <h5 class="card-title">XMED App</h5>
-                          <p class="card-text">To start with an demo app, please choose patient.</p>
-                          <div class="dropdown">
-                            <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                              Choose patient
-                            </button>
-                            <ul class="dropdown-menu">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                            Change patient
+                        </button>
+                        <ul class="dropdown-menu">
                             {% for ID in PATIENT_IDs %}
-                              <li><a class="dropdown-item" onclick="showLoadingModal()" href="{{ url_for('visualize_scan', PATIENT_ID=ID) }}">Patient {{ID}}</a></li>
+                            <li><a class="dropdown-item" onclick="showLoadingModal()" href="{{ url_for('visualize_scan', PATIENT_ID=ID)}}">Patient
+                                    {{ ID }}</a></li>
                             {% endfor %}
-                            </ul>
-                          </div>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <h2 class="text-center">Extracted Nodules</h2>
+                    <div class="d-flex">
+                        <div class="scrollable-list w-100 justify-content-center">
+                            {% for NOD_icon, NOD_crop in NODULES %}
+                            <div class="card mb-3" style="max-width: 540px;">
+                                <div class="row g-0">
+                                    <div class="col-md-4">
+                                        <img src="data:image/png;base64,{{ NOD_icon }}"
+                                            class="img-fluid rounded-start" alt="...">
+                                    </div>
+                                    <div class="col-md-8">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Nodule {{loop.index }}</h5>
+                                            <p class="card-text">Choose that nodule for further analysis.</p>
+                                            <a href="{{ url_for('visualize_nodule', NOD_crop=NOD_crop)}}" class="btn btn-primary">Analyze nodule</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
                         </div>
                     </div>
                 </div>
@@ -66,7 +89,8 @@
         <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
             <p class="col-md-4 mb-0 footer-text">&copy; 2024 XMED</p>
 
-            <a href="/" class="col-md-4 d-flex align-items-center justify-content-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none">
+            <a href="/"
+                class="col-md-4 d-flex align-items-center justify-content-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none">
                 <span class="fs-4"><span class="logo-x">X</span><span class="logo-med">MED</span></span>
             </a>
 
@@ -75,6 +99,7 @@
             </ul>
         </footer>
     </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <script>
         function showLoadingModal() {
@@ -83,4 +108,5 @@
         }
     </script>
 </body>
+
 </html>
