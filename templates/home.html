@@ -8,74 +8,114 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link href="{{ url_for('static', path='/styles.css') }}" rel="stylesheet">
+    <style>
+        body,
+        html {
+            height: 100%;
+            margin: 0;
+        }
+
+        .wrapper {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        header,
+        footer {
+            flex-shrink: 0;
+            width: 100%;
+        }
+
+        main {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
 </head>
 
 <body>
-    <!-- Header with project name (as logo) and link to About page. -->
-    <div class="container">
-        <header class="d-flex flex-wrap justify-content-center py-3 mb-4 border-bottom">
-            <a href="{{ url_for('home') }}" class="d-flex align-items-center mb-3 mb-md-auto text-dark text-decoration-none">
-                <span class="fs-4"><span class="logo-x">X</span><span class="logo-med">MED</span></span>
-            </a>
-        </header>
-    </div>
-
-    <main>
+    <div class="wrapper">
+        <!-- Header with project name (as logo) and link to About page. -->
         <div class="container">
-            <div class="row justify-content-center align-items-center"> <!-- style="height: 100vh;" -->
-                <div class="col-md-6 d-flex justify-content-center">
-                    <div class="card" style="width: 18rem;">
-                        <img src="{{ url_for('static', path='chest_CT.jpg')}}" class="card-img-top" alt="...">
-                        <div class="card-body">
-                          <h5 class="card-title">XMED App</h5>
-                          <p class="card-text">To start with an demo app, please choose patient.</p>
-                          <div class="dropdown">
-                            <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                              Choose patient
-                            </button>
-                            <ul class="dropdown-menu">
-                            {% for ID in PATIENT_IDs %}
-                              <li><a class="dropdown-item" onclick="showLoadingModal()" href="{{ url_for('visualize_scan', PATIENT_ID=ID) }}">Patient {{ID}}</a></li>
-                            {% endfor %}
-                            </ul>
-                          </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <header class="d-flex flex-wrap justify-content-between align-items-center py-3 mb-4 border-bottom">
+                <a href="{{ url_for('home') }}"
+                    class="d-flex align-items-center mb-3 mb-md-0 text-dark text-decoration-none">
+                    <img src="{{ url_for('static', path='logo_v2.png')}}" width="200" alt="logo">
+                </a>
+            </header>
         </div>
-        <!-- Modal -->
-        <div class="modal fade" id="loadingModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="loadingModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-body d-flex justify-content-center align-items-center">
-                        <div>
-                            <div class="spinner-border text-primary" role="status">
-                                <span class="visually-hidden">Loading...</span>
+
+        <main>
+            <div class="container">
+                <div class="row justify-content-center align-items-center">
+                    <div class="col-md-6 d-flex justify-content-center">
+                        <div class="card mb-5" style="width: 18rem; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+                            <img src="{{ url_for('static', path='chest_CT.jpg')}}" class="card-img-top" alt="Chest CT">
+                            <div class="card-body">
+                                <h5 class="card-title">Lung nodules analysis</h5>
+                                <p class="card-text">To start with an demo app, please choose a patient.</p>
+                                <div class="dropdown">
+                                    <button class="btn btn-primary dropdown-toggle" type="button"
+                                        data-bs-toggle="dropdown" aria-expanded="false">
+                                        Choose patient
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        {% for ID in PATIENT_IDs %}
+                                        <li><a class="dropdown-item" onclick="showLoadingModal()"
+                                                href="{{ url_for('visualize_scan', PATIENT_ID=ID) }}">Patient {{ID}}</a>
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
                             </div>
-                            <p>Loading, please wait...</p>
                         </div>
                     </div>
                 </div>
             </div>
+        </main>
+
+        <div class="container-fluid" style="background-color: rgb(240, 240, 240);">
+            <div class="container">
+                <!-- Website footer -->
+                <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4">
+                    <p class="col-md-4 mb-0 footer-text"><strong>&copy; 2024 Xmed</strong></p>
+
+                    <a href="/"
+                        class="col-md-4 d-flex align-items-center justify-content-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none">
+                        <img src="{{ url_for('static', path='logo_v2.png')}}" width="200" alt="logo">
+                    </a>
+
+                    <ul class="nav col-md-4 justify-content-end">
+                        <li class="nav-item"><a href="https://www.linkedin.com/in/bindajakub/"
+                                class="nav-link px-2 footer-link"><strong>Contact</strong></a></li>
+                    </ul>
+                </footer>
+            </div>
         </div>
-    </main>
-
-    <div class="container">
-        <!-- Website footer -->
-        <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
-            <p class="col-md-4 mb-0 footer-text">&copy; 2024 XMED</p>
-
-            <a href="/" class="col-md-4 d-flex align-items-center justify-content-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none">
-                <span class="fs-4"><span class="logo-x">X</span><span class="logo-med">MED</span></span>
-            </a>
-
-            <ul class="nav col-md-4 justify-content-end">
-                <li class="nav-item"><a href="#" class="nav-link px-2 footer-link">About</a></li>
-            </ul>
-        </footer>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+    <div class="modal fade" id="loadingModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+        aria-labelledby="loadingModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body d-flex justify-content-center align-items-center">
+                    <div>
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p>Loading, please wait...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
     <script>
         function showLoadingModal() {
             var myModal = new bootstrap.Modal(document.getElementById('loadingModal'));
@@ -83,4 +123,5 @@
         }
     </script>
 </body>
+
 </html>

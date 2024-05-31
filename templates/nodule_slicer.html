@@ -8,135 +8,196 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link href="{{ url_for('static', path='/styles.css') }}" rel="stylesheet">
+    <style>
+        body,
+        html {
+            height: 100%;
+            margin: 0;
+        }
+
+        .wrapper {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        header,
+        footer {
+            flex-shrink: 0;
+            width: 100%;
+        }
+
+        main {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .main-content {
+            width: 100%;
+        }
+
+        .header-container,
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+    </style>
 </head>
 
 <body>
-    <!-- Header with project name (as logo) and link to About page. -->
-    <div class="container">
-        <header class="d-flex flex-wrap justify-content-center py-3 mb-4 border-bottom">
-            <a href="{{ url_for('home') }}" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-dark text-decoration-none">
-                <span class="fs-4"><span class="logo-x">X</span><span class="logo-med">MED</span></span>
-            </a>
-        </header>
-    </div>
-
-    <main>
+    <div class="wrapper">
+        <!-- Header with project name (as logo) and link to About page. -->
         <div class="container">
-            <div class="row">
-                <!-- Options -->
-                <div class="col-md-12">
-                    <a href="{{ url_for('list_nodules') }}" class="btn btn-secondary">Return to nodules list</a>
-                </div>
-                <div class="col-lg-4 col-md-12 {% if not reg_att_plot %}offset-lg-2{% else %}ms-auto{% endif %}">
-                    <!-- Slice number input -->
-                    <div class="row mt-3 form-group options">
-                        <div class="col-md-12">
-                        <h3>Choose nodule slice</h3>
-                        <form action="{{ url_for('visualize_nodule', NOD_crop=NOD_crop) }}" method="get">
-                            <div class="col-md-9 offset-1">
-                                <input type="range" class="form-range" name="SLC" min="12" max="22" step="1" id="sliceNumber" value="{{SLC}}" oninput="sliceOutput.value = sliceNumber.value" onchange="this.form.submit()">
-                                <p>Chosen slice: <output id="sliceOutput">{{ SLC }}</output></p>
-                            </div>
-                        </form>
-                        </div>
+            <header class="d-flex flex-wrap justify-content-between align-items-center py-3 mb-4 border-bottom">
+                <a href="{{ url_for('home') }}"
+                    class="d-flex align-items-center mb-3 mb-md-0 text-dark text-decoration-none">
+                    <img src="{{ url_for('static', path='logo_v2.png')}}" width="200" alt="logo">
+                </a>
+            </header>
+        </div>
+
+        <main>
+            <div class="container main-content">
+                <div class="row">
+                    <div class="col-md-12">
+                        <a href="{{ url_for('list_nodules') }}" class="btn btn-secondary">Return to nodules list</a>
                     </div>
-                    <div class="row mb-2">
-                        <h3 style="margin-top: 0.4cm;">Choose prediction mode</h3>
-                        <div class="col-md-9 offset-1 text-center">
-                            <div class="btn-group-horizontal" role="group" aria-label="Horizontal radio toggle button group">
-                                <form action="{{  url_for('predict', NODULE=NOD_crop, SLICE=SLC) }}" method="get">
-                                    <input type="radio" class="btn-check" name="TASK" id="button1" value="Classification" autocomplete="off" required>
-                                    <label class="btn btn-outline-primary" for="button1">Classification</label>
-                                    <input type="radio" class="btn-check" name="TASK" id="button2" value="Regression" autocomplete="off" required>
-                                    <label class="btn btn-outline-primary" for="button2">Regression</label>
-                                    <div style="margin-top: 0.4cm;">
-                                        <button type="submit" class="btn btn-primary mt-3" onclick="showLoadingModal()"><strong>PREDICT!</strong></button>
+                </div>
+                <!-- Options -->
+                <div class="row">
+                    <div class="col-lg-4 col-md-12 {% if not reg_att_plot %}offset-lg-2{% else %}ms-auto{% endif %}">
+                        <!-- Slice number input -->
+                        <div class="row mt-3 form-group options">
+                            <div class="col-md-12">
+                                <h3>Choose nodule slice</h3>
+                                <form action="{{ url_for('visualize_nodule', NOD_crop=NOD_crop) }}" method="get">
+                                    <div class="col-md-9 offset-1">
+                                        <input type="range" class="form-range" name="SLC" min="12" max="22" step="1"
+                                            id="sliceNumber" value="{{SLC}}"
+                                            oninput="sliceOutput.value = sliceNumber.value"
+                                            onchange="this.form.submit()">
+                                        <p>Chosen slice: <output id="sliceOutput">{{ SLC }}</output></p>
                                     </div>
                                 </form>
                             </div>
                         </div>
+                        <div class="row mb-2">
+                            <h3 style="margin-top: 0.4cm;">Choose prediction mode</h3>
+                            <div class="col-md-9 offset-1 text-center">
+                                <div class="btn-group-horizontal" role="group"
+                                    aria-label="Horizontal radio toggle button group">
+                                    <form action="{{  url_for('predict', NODULE=NOD_crop, SLICE=SLC) }}" method="get">
+                                        <input type="radio" class="btn-check" name="TASK" id="button1"
+                                            value="Classification" autocomplete="off" required>
+                                        <label class="btn btn-outline-primary" for="button1">Classification</label>
+                                        <input type="radio" class="btn-check" name="TASK" id="button2"
+                                            value="Regression" autocomplete="off" required>
+                                        <label class="btn btn-outline-primary" for="button2">Regression</label>
+                                        <div style="margin-top: 0.4cm;">
+                                            <button type="submit" class="btn btn-primary mt-3"
+                                                onclick="showLoadingModal()"><strong>PREDICT!</strong></button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <!-- CT slices visualization -->
-                <div class="col-lg-3 col-md-12 image-box">
-                    <div class="title-container">
-                        <h3>Nodule's slice</h3>
-                        <img src="data:image/png;base64,{{ orig_plot }}" class="img-fluid" alt="Nodule slice">
-                    </div>
-                </div>
-                <!-- Attention visualization -->
-                {% if reg_att_plot %}
-                <div class="col-lg-3 col-md-12 ms-lg-3 me-auto image-box">
-                    <div class="title-container">
-                        <h3>Attention map</h3>
-                        <img src="data:image/png;base64,{{ reg_att_plot }}" class="img-fluid" alt="Attention map">
-                    </div>
-                </div>
-                {% else %}
-                {% endif %}
-            </div>
-
-            {% if res_plot %}
-            <!-- Plotting Results -->
-            <div class="col-md-9 col-lg-8 mt-4 ms-auto me-auto">
-                <div class="row image-box">
-                    {% if TASK == "Regression" %}
-                    <h2>CDAM scores</h2>
-                    <div class="col-md-12">
+                    <!-- CT slices visualization -->
+                    <div class="col-lg-3 col-md-12 image-box">
                         <div class="title-container">
-                            <img src="data:image/png;base64,{{ res_plot }}" class="img-fluid" alt="Plot of resulting maps">
+                            <h3>Nodule's slice</h3>
+                            <img src="data:image/png;base64,{{ orig_plot }}" class="img-fluid" alt="Nodule slice">
+                        </div>
+                    </div>
+                    <!-- Attention visualization -->
+                    {% if reg_att_plot %}
+                    <div class="col-lg-3 col-md-12 ms-lg-3 me-auto image-box">
+                        <div class="title-container">
+                            <h3>Attention map</h3>
+                            <img src="data:image/png;base64,{{ reg_att_plot }}" class="img-fluid" alt="Attention map">
                         </div>
                     </div>
                     {% else %}
-                    <h2>Results</h2>
-                    <div class="col-md-9 col-lg-8">
-                        <div class="title-container">
-                            <img src="data:image/png;base64,{{ res_plot }}" class="img-fluid" alt="Plot of resulting maps">
+                    {% endif %}
+                </div>
+
+                {% if res_plot %}
+                <!-- Plotting Results -->
+                <div class="row mt-3 mb-4">
+                    <div class="col-md-9 col-lg-8 ms-auto me-auto">
+                        <div class="row image-box">
+                            {% if TASK == "Regression" %}
+                            <h2>CDAM scores</h2>
+                            <div class="col-md-12">
+                                <div class="title-container">
+                                    <img src="data:image/png;base64,{{ res_plot }}" class="img-fluid"
+                                        alt="Plot of resulting maps">
+                                </div>
+                            </div>
+                            {% else %}
+                            <h2>Results</h2>
+                            <div class="col-md-9 col-lg-8">
+                                <div class="title-container">
+                                    <img src="data:image/png;base64,{{ res_plot }}" class="img-fluid"
+                                        alt="Plot of resulting maps">
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-lg-4 class_pred">
+                                <h4 class="mt-md-3 mt-lg-5">Predicted status:</h4>
+                                <p><strong> {% if PREDS > 0.5 %} MALIGNANT {% else %} BENIGN {% endif %}</strong></p>
+                                <p class="mt-3"> Probability of malignancy: </p>
+                                <p>{{ PREDS }}</p>
+                            </div>
+                            {% endif %}
                         </div>
-                    </div>
-                    <div class="col-md-3 col-lg-4 class_pred">
-                        <h4 class="mt-md-3 mt-lg-5">Predicted status:</h4>
-                        <p><strong> {% if PREDS > 0.5  %} MALIGNANT {%  else  %} BENIGN {%  endif  %}</strong></p>
-                        <p class="mt-3"> Probability of malignancy: </p>
-                        <p>{{  PREDS  }}</p>
                     </div>
                     {% endif %}
                 </div>
             </div>
-            {% endif %}
-        </div>
-        <!-- Modal -->
-        <div class="modal fade" id="loadingModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="loadingModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-body d-flex justify-content-center align-items-center">
-                        <div>
-                            <div class="spinner-border text-primary" role="status">
-                                <span class="visually-hidden">Loading...</span>
+            <!-- Modal -->
+            <div class="modal fade" id="loadingModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+                aria-labelledby="loadingModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-body d-flex justify-content-center align-items-center">
+                            <div>
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p>Analysis in progress, please wait...</p>
                             </div>
-                            <p>Analysis in progress, please wait...</p>
                         </div>
                     </div>
                 </div>
             </div>
+        </main>
+
+        <div class="container-fluid" style="background-color: rgb(240, 240, 240);">
+            <div class="container">
+                <!-- Website footer -->
+                <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4">
+                    <p class="col-md-4 mb-0 footer-text"><strong>&copy; 2024 Xmed</strong></p>
+
+                    <a href="/"
+                        class="col-md-4 d-flex align-items-center justify-content-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none">
+                        <img src="{{ url_for('static', path='logo_v2.png')}}" width="200" alt="logo">
+                    </a>
+
+                    <ul class="nav col-md-4 justify-content-end">
+                        <li class="nav-item"><a href="https://www.linkedin.com/in/bindajakub/"
+                                class="nav-link px-2 footer-link"><strong>Contact</strong></a></li>
+                    </ul>
+                </footer>
+            </div>
         </div>
-    </main>
-
-    <div class="container">
-        <!-- Website footer -->
-        <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
-            <p class="col-md-4 mb-0 footer-text">&copy; 2024 XMED</p>
-
-            <a href="/" class="col-md-4 d-flex align-items-center justify-content-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none">
-                <span class="fs-4"><span class="logo-x">X</span><span class="logo-med">MED</span></span>
-            </a>
-
-            <ul class="nav col-md-4 justify-content-end">
-                <li class="nav-item"><a href="#" class="nav-link px-2 footer-link">About</a></li>
-            </ul>
-        </footer>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
     <script>
         function showLoadingModal() {
             var myModal = new bootstrap.Modal(document.getElementById('loadingModal'));
@@ -144,4 +205,5 @@
         }
     </script>
 </body>
+
 </html>

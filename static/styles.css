@@ -8,11 +8,15 @@
 
 /* NODULES LIST */
 .scrollable-list{
-    max-height: 400px;
+    max-height: 450px;
     overflow-y: scroll;
 }
 
 /* HEADER */
+.header {
+    max-height: 50px;
+}
+
 .logo-x {
     font-weight: bold;
     color: blue;
@@ -51,6 +55,9 @@
 }
 
 /* FOOTER */
+.footer{
+    max-height: 50px;
+}
 .footer-text {
     color: #6c757d;
 }

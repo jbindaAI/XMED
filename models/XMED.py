@@ -33,12 +33,12 @@ def model_pipeline(NODULE: str, SLICE: int, TASK: Literal["Regression", "Classif
     # Loading model and registering hooks:
     device = "cuda" if torch.cuda.is_available() else "cpu"
     if TASK == "Regression":
-        MODEL_NR=4 # Best checkpoint will be chosen.
+        MODEL_NR=13 # Best checkpoint will be chosen.
         biom_model = Biomarker_Model.load_from_checkpoint(
             f"models/checkpoints/Biomarkers/best-checkpoint_{MODEL_NR}.ckpt").to(device).eval()
         model = biom_model
     else:
-        MODEL_NR=4 # Best checkpoint will be chosen.
+        MODEL_NR=12 # Best checkpoint will be chosen.
         E2E_model = End2End_Model.load_from_checkpoint(
             f"models/checkpoints/End2End/best-checkpoint_{MODEL_NR}.ckpt").to(device).eval()
         model = E2E_model
