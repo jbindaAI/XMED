@@ -9,6 +9,10 @@ import pickle
 import pylidc as pl
 import os
 from my_utils import *
+from pathlib import Path
+
+# Creating cache folder:
+Path("cache/crops").mkdir(parents=True, exist_ok=True)
 
 def clean_cache():
     # Cleaning cache:
