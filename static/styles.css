@@ -1,40 +1,5 @@
 /* styles.css */
 
-/* General layout */
-body, html {
-    height: 100%;
-    margin: 0;
-}
-
-.wrapper {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-}
-
-header, footer {
-    flex-shrink: 0;
-    width: 100%;
-}
-
-main {
-    flex-grow: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.main-content {
-    width: 100%;
-}
-
-.header-container, .footer-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    width: 100%;
-}
-
-
 /* Dropdown menu of patients */
 .dropdown-menu{
     max-height: 200px;
@@ -43,7 +8,7 @@ main {
 
 /* NODULES LIST */
 .scrollable-list{
-    max-height: 450px;
+    max-height: 300px;
     overflow-y: scroll;
 }
 
@@ -88,4 +53,11 @@ main {
 }
 .footer-link:hover {
     color: #343a40;
+}
+
+@media (max-width: 576px) {
+    .logo {
+        max-width: 100px;
+        height: auto;
+    }
 }

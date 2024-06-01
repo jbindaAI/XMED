@@ -152,7 +152,7 @@ def load_dicom_into_tensor(patient_id: str)->torch.Tensor:
 
 
 def plot_scan(scan_pt:torch.Tensor, slc:int)->str:
-    plt.figure(figsize=(5,5))
+    plt.figure(figsize=(3.5,3.5))
     plt.set_cmap('gray')
     plt.imshow(scan_pt[:, :, slc])
     plt.axis("off")

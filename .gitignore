@@ -7,7 +7,5 @@ data/LIDC-IDRI
 venv/
 __pycache__/
 models/__pycache__/
-static/*.png
-static/*.jpg
 cache/
 

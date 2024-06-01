@@ -1,4 +1,4 @@
-<!doctype html> 
+<!doctype html>
 <html lang="en">
 
 <head>
@@ -8,6 +8,52 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link href="{{ url_for('static', path='/styles.css') }}" rel="stylesheet">
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+        }
+
+        .wrapper {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        header, footer {
+            flex-shrink: 0;
+        }
+
+        main {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .main-content {
+            width: 100%;
+        }
+
+        .image-box img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .title-container h3 {
+            text-align: center;
+        }
+
+        .dropdown-menu {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .btn-block {
+            width: 100%;
+        }
+    </style>
 </head>
 
 <body>
@@ -15,20 +61,18 @@
         <!-- Header with project name (as logo) and link to About page. -->
         <div class="container">
             <header class="d-flex flex-wrap justify-content-between align-items-center py-3 mb-4 border-bottom">
-                <a href="{{ url_for('home') }}"
-                    class="d-flex align-items-center mb-3 mb-md-0 text-dark text-decoration-none">
-                    <img src="{{ url_for('static', path='logo_v2.png')}}" width="200" alt="logo">
+                <a href="{{ url_for('home') }}" class="d-flex align-items-center mb-3 mb-md-0 text-dark text-decoration-none">
+                    <img src="{{ url_for('static', path='logo_v2.png')}}" class="logo" width="200" alt="XMED logo">
                 </a>
             </header>
         </div>
 
         <main>
             <div class="container main-content">
-                <div class="row mb-3">
+                <div class="row mb-1">
                     <div class="col-md-12">
                         <div class="dropdown">
-                            <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
-                                aria-expanded="false">
+                            <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 Change patient
                             </button>
                             <ul class="dropdown-menu">
@@ -39,15 +83,14 @@
                         </div>
                     </div>
                 </div>
-                <div class="row mb-5">
-                    <div class="col-md-4 offset-lg-1 d-flex flex-column justify-content-center">
+                <div class="row mb-3">
+                    <div class="col-md-4 offset-lg-2 d-flex flex-column justify-content-center">
                         <div class="row mt-3 form-group">
                             <div class="col-md-12">
                                 <h3>Choose scan's slice</h3>
                                 <form action="{{ url_for('visualize_scan', PATIENT_ID=PATIENT_ID) }}" method="get">
                                     <div class="col-md-12">
-                                        <input type="range" class="form-range" name="SLC" min="0" max="{{ max_depth }}"
-                                            step="1" id="sliceNumber" value="{{SLC}}"
+                                        <input type="range" class="form-range" name="SLC" min="0" max="{{ max_depth }}" step="1" id="sliceNumber" value="{{SLC}}"
                                             oninput="sliceOutput.value = sliceNumber.value" onchange="this.form.submit()">
                                         <p>Chosen slice: <output id="sliceOutput">{{ SLC }}</output></p>
                                     </div>
@@ -62,10 +105,10 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-6 ms-lg-2">
+                    <div class="col-md-4 ms-lg-2">
                         <div class="title-container image-box">
-                            <h3>CT scan of the patient {{PATIENT_ID}} </h3>
-                            <img src="data:image/png;base64,{{ scan_plot }}" class="img-fluid" alt="Scan slice">
+                            <h3>CT scan of the patient: {{PATIENT_ID}}</h3>
+                            <img src="data:image/png;base64,{{ scan_plot }}" class="img-fluid" width="320" alt="Scan slice">
                         </div>
                     </div>
                 </div>
@@ -93,29 +136,27 @@
                 <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4">
                     <p class="col-md-4 mb-0 footer-text"><strong>&copy; 2024 Xmed</strong></p>
 
-                    <a href="/"
-                        class="col-md-4 d-flex align-items-center justify-content-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none">
-                        <img src="{{ url_for('static', path='logo_v2.png')}}" width="200" alt="logo">
+                    <a href="{{ url_for('home') }}" class="col-md-4 d-flex align-items-center justify-content-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none">
+                        <img src="{{ url_for('static', path='logo_v2.png')}}" class="logo" width="200" alt="XMED logo">
                     </a>
 
                     <ul class="nav col-md-4 justify-content-end">
-                        <li class="nav-item"><a href="https://www.linkedin.com/in/bindajakub/"
-                                class="nav-link px-2 footer-link"><strong>Contact</strong></a></li>
+                        <li class="nav-item"><a href="https://www.linkedin.com/in/bindajakub/" target="_blank" class="nav-link px-2 footer-link"><strong>Contact</strong></a></li>
                     </ul>
                 </footer>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous" defer></script>
     <script>
         function showLoadingModal() {
             var myModal = new bootstrap.Modal(document.getElementById('loadingModal'));
             myModal.show();
         }
 
-        const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]')
-        const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl))
+        const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]');
+        const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl));
     </script>
 </body>
 
