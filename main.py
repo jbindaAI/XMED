@@ -35,7 +35,7 @@ with open("data/ALL_annotations_df.pkl", "rb") as file:
 with open("data/match_ALL_df.pkl", "rb") as file:
     match_df = pickle.load(file)
     PATIENT_IDs = list(match_df[0])
-    PATIENT_IDs = list(dict.fromkeys(PATIENT_IDs))
+    PATIENT_IDs = list(dict.fromkeys(PATIENT_IDs))[:100]
 
 
 @app.get("/", response_class=HTMLResponse)
