@@ -40,8 +40,6 @@ with open("data/match_ALL_df.pkl", "rb") as file:
 
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request):
-    ### Rozważyć usunięcie funkcji czyszczącej cache!
-    clean_cache()
     return templates.TemplateResponse(
         name="home.html", request=request, context={"PATIENT_IDs":PATIENT_IDs})
 
