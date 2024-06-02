@@ -3,6 +3,8 @@ from fastapi import FastAPI, Request, Query
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
+from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
 from loading_data_utils import load_img
 import pickle
@@ -27,7 +29,8 @@ clean_cache()
 
 
 app = FastAPI()
-
+app.add_middleware(ProxyHeadersMiddleware, trusted_hosts=["*"])
+app.add_middleware(HTTPSRedirectMiddleware)
 templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
