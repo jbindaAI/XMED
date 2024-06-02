@@ -30,7 +30,6 @@ clean_cache()
 
 app = FastAPI()
 app.add_middleware(ProxyHeadersMiddleware, trusted_hosts=["*"])
-app.add_middleware(HTTPSRedirectMiddleware)
 templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
