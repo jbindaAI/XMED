@@ -1,6 +1,6 @@
 # XMED Project
 
-![XMED Logo](static/logo_v2.png)
+<img src="static/logo_v2.png" alt="XMED Logo" width="200"/>
 
 ## Overview
 
