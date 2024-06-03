@@ -11,7 +11,7 @@ Welcome to the XMED Project repository! This project aims to leverage state-of-t
 ## Online demo
 
 Demo app instance is running at IBM Cloud OpenShift Cluster. To check it out, visit:
-<a href="https://xmed-xmed-app.mycluster-fra02-b3-307961-7a4f0f60e0bb120db8b4212665d0ca17-0000.eu-de.containers.appdomain.cloud/"><strong>DEMO</strong></a>
+<a href="https://xmed-xmed-app.mycluster-fra02-b3-307961-7a4f0f60e0bb120db8b4212665d0ca17-0000.eu-de.containers.appdomain.cloud/" target="_blank"><strong>DEMO</strong></a>
 
 ## Prerequisites
 
