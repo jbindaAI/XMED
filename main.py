@@ -3,7 +3,6 @@ from fastapi import FastAPI, Request, Query
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
-from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
 from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
 from loading_data_utils import load_img
@@ -37,11 +36,20 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 with open("data/ALL_annotations_df.pkl", "rb") as file:
     ann_df = pickle.load(file)
 
-# Loading list of available Patients:
 with open("data/match_ALL_df.pkl", "rb") as file:
-    match_df = pickle.load(file)
-    PATIENT_IDs = list(match_df[0])
-    PATIENT_IDs = list(dict.fromkeys(PATIENT_IDs))[:50]
+    match = pickle.load(file)
+
+with open("data/splitted_sets/test_fold_1.pkl", "rb") as file:
+    test_data = pickle.load(file)
+
+# Taking test examples
+PATIENT_IDs = []
+for rec_id in test_data[:13]:
+    nodule_path = ann_df.iloc[rec_id]["path"]
+    nodule_id = int(nodule_path.split(".")[0])
+    record = match[match[2]==nodule_id]
+    patient_id = record[0]
+    PATIENT_IDs.append(patient_id.values[0])
 
 
 @app.get("/", response_class=HTMLResponse)

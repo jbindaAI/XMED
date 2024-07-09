@@ -6,8 +6,9 @@ import numpy as np
 import pickle
 
 # Loading fitted previously standard scaler:
-with open("data/scaler.pkl", "rb") as file:
-    scaler = pickle.load(file)
+with open("data/splitted_sets/fitted_factors.pkl", "rb") as file:
+    _, _, scaler = pickle.load(file)["fold_1"]
+
 
 # Globals
 PATCH_SIZE=8
@@ -43,7 +44,7 @@ def get_cmap(heatmap):
 ## Obtaining attention map
 def get_attention_map(model, sample_img, head=None, return_raw=False):
     """This returns the attentions when CLS token is used as query in the last attention layer, averaged over all attention heads"""
-    attentions = model.model.get_last_selfattention(sample_img)
+    attentions = model.backbone.get_last_selfattention(sample_img)
 
     w_featmap = sample_img.shape[-2] // PATCH_SIZE
     h_featmap = sample_img.shape[-1] // PATCH_SIZE

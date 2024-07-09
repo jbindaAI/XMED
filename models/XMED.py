@@ -1,27 +1,18 @@
-# TO DO:
-# It would be better, to change in model defining files self.model to self.dino to emphasize that it is a DINO part.
-
-
-
-
-
 # Imports
 import torch
 import pickle
 from typing import Literal, Tuple, Dict
 
-from models.Biomarker_SSL import Biomarker_Model
-from models.End2End_SSL import End2End_Model
+from models.Biomarker_Model import Biomarker_Model
+from models.End2End_Model import End2End_Model
 from models.att_cdam_utils import get_maps
 from loading_data_utils import load_img
 
 # Globals
 ### Normalizing MEAN:
-with open("data/fitted_mean_std.pkl", 'rb') as f:
-    dict_ = pickle.load(f)
-
-MEAN = dict_["mean"]
-STD = dict_["std"]
+with open("data/splitted_sets/fitted_factors.pkl", 'rb') as f:
+    dict_ = pickle.load(f)['fold_1']
+    MEAN, STD, SCALER = dict_
 
 
 # MAIN
@@ -33,14 +24,12 @@ def model_pipeline(NODULE: str, SLICE: int, TASK: Literal["Regression", "Classif
     # Loading model and registering hooks:
     device = "cuda" if torch.cuda.is_available() else "cpu"
     if TASK == "Regression":
-        MODEL_NR=13 # Best checkpoint will be chosen.
         biom_model = Biomarker_Model.load_from_checkpoint(
-            f"models/checkpoints/Biomarkers/best-checkpoint_{MODEL_NR}.ckpt").to(device).eval()
+            f"models/checkpoints/Biomarkers/dino_vitb8_22_1.ckpt").to(device).eval()
         model = biom_model
     else:
-        MODEL_NR=12 # Best checkpoint will be chosen.
         E2E_model = End2End_Model.load_from_checkpoint(
-            f"models/checkpoints/End2End/best-checkpoint_{MODEL_NR}.ckpt").to(device).eval()
+            f"models/checkpoints/End2End/dino_vitb8_38_1.ckpt").to(device).eval()
         model = E2E_model
     
     ## Creating hooks:
@@ -69,7 +58,7 @@ def model_pipeline(NODULE: str, SLICE: int, TASK: Literal["Regression", "Classif
     ### Both are required to compute CDAM score.
     ### We don't need to register hook on MHSA to extract attention weights, because DINO backbone has it already implemented.
 
-    final_block_norm1 = model.model.blocks[-1].norm1
+    final_block_norm1 = model.backbone.blocks[-1].norm1
     activation_hook = final_block_norm1.register_forward_hook(
         get_activation("last_att_in"))
     grad_hook = final_block_norm1.register_full_backward_hook(

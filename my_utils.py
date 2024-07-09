@@ -78,7 +78,7 @@ def plot_CDAM_reg(maps, preds):
             sns.histplot(ann_df,
                          x=target_names[k].lower(),
                          kde=True,
-                         bins=16,
+                         bins=14,
                          stat="percent",
                          ax=axs[i][j])
             axs[i][j].axvline(x=preds[target_names[k]],
